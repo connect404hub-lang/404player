@@ -200,7 +200,8 @@ export default function LibraryPage() {
                   return (
                     <div 
                       key={songId + '-' + idx}
-                      className="flex items-center justify-between p-2 rounded border border-border-color/30 bg-bg-secondary/20 hover:bg-bg-secondary/50 transition-all text-[11px] md:text-xs"
+                      onClick={() => handlePlayPlaylistSong(selectedPlaylist, idx)}
+                      className="flex items-center justify-between p-2 rounded border border-border-color/30 bg-bg-secondary/20 hover:bg-bg-secondary/50 transition-all text-[11px] md:text-xs cursor-pointer"
                     >
                       <div className="flex items-center gap-2.5 min-w-0 flex-1">
                         <span className="text-[9px] text-text-secondary w-4 text-right">{idx + 1}.</span>
@@ -219,14 +220,20 @@ export default function LibraryPage() {
                         </span>
                         
                         <button 
-                          onClick={() => handlePlayPlaylistSong(selectedPlaylist, idx)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handlePlayPlaylistSong(selectedPlaylist, idx);
+                          }}
                           className="p-1 hover:text-accent cursor-pointer transition-colors text-text-secondary"
                         >
                           <Play size={12} fill="currentColor" />
                         </button>
                         
                         <button 
-                          onClick={() => handleRemoveSong(selectedPlaylist.id || selectedPlaylist._id, songId)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveSong(selectedPlaylist.id || selectedPlaylist._id, songId);
+                          }}
                           className="p-1 hover:text-red-400 cursor-pointer transition-colors text-text-secondary"
                         >
                           <Trash2 size={12} />

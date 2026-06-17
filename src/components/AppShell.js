@@ -13,7 +13,7 @@ export default function AppShell({ children }) {
   const { showTerminal } = usePlayer();
 
   return (
-    <div className="flex flex-col md:flex-row h-screen w-screen overflow-hidden bg-bg-primary text-text-primary relative select-none font-mono">
+    <div className="flex flex-col md:flex-row h-[100dvh] w-screen overflow-hidden bg-bg-primary text-text-primary relative select-none font-mono">
       {/* Visual Background Layers */}
       <RetroGrid />
       <div className="scanline" />

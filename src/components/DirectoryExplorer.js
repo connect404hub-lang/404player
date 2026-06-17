@@ -189,7 +189,8 @@ export default function DirectoryExplorer({ id, type, onClose }) {
                         initial={{ opacity: 0, x: -12 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: idx * 0.04, type: 'spring', stiffness: 300, damping: 25 }}
-                        className="flex items-center justify-between p-2 rounded border border-border-color/30 bg-bg-secondary/40 hover:bg-bg-tertiary/50 transition-colors text-xs text-text-secondary group"
+                        onClick={() => handlePlaySong(song, idx)}
+                        className="flex items-center justify-between p-2 rounded border border-border-color/30 bg-bg-secondary/40 hover:bg-bg-tertiary/50 transition-colors text-xs text-text-secondary group cursor-pointer"
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1">
                           <span className="text-[9px] text-text-secondary w-4 text-right">{idx + 1}.</span>
@@ -204,7 +205,10 @@ export default function DirectoryExplorer({ id, type, onClose }) {
                           
                           {/* Play button */}
                           <button
-                            onClick={() => handlePlaySong(song, idx)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handlePlaySong(song, idx);
+                            }}
                             className="p-1 hover:text-accent cursor-pointer transition-colors text-text-secondary"
                             title="Play this file"
                           >
@@ -214,7 +218,10 @@ export default function DirectoryExplorer({ id, type, onClose }) {
                           {/* Add to Playlist button */}
                           <div className="relative">
                             <button
-                              onClick={() => setPlaylistDropdown(playlistDropdown === song.id ? null : song.id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setPlaylistDropdown(playlistDropdown === song.id ? null : song.id);
+                              }}
                               className="p-1 hover:text-accent cursor-pointer transition-colors text-text-secondary"
                               title="Mount into local folder"
                             >
@@ -227,7 +234,10 @@ export default function DirectoryExplorer({ id, type, onClose }) {
 
                             {/* Dropdown menu */}
                             {playlistDropdown === song.id && (
-                              <div className="absolute right-0 bottom-6 w-40 bg-bg-secondary border border-border-color rounded shadow-xl py-1 z-55 flex flex-col text-[10px]">
+                              <div 
+                                onClick={(e) => e.stopPropagation()}
+                                className="absolute right-0 bottom-6 w-40 bg-bg-secondary border border-border-color rounded shadow-xl py-1 z-55 flex flex-col text-[10px]"
+                              >
                                 <div className="px-2 py-1 border-b border-border-color/60 text-[9px] text-accent/60 uppercase font-bold tracking-wider flex items-center gap-1">
                                   <FolderPlus size={10} />
                                   <span>mount to folder</span>

@@ -14,21 +14,39 @@ export default function Visualizer() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const resizeCanvas = () => {
+    const handleResize = () => {
       if (canvas.parentElement) {
-        canvas.width = canvas.parentElement.clientWidth;
-        canvas.height = canvas.parentElement.clientHeight || 150;
+        const w = canvas.parentElement.clientWidth;
+        const h = canvas.parentElement.clientHeight;
+        if (w > 0) {
+          canvas.width = w;
+          canvas.height = h || 150;
+        }
       }
     };
     
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
+    handleResize();
+
+    let resizeObserver = null;
+    if (typeof ResizeObserver !== 'undefined' && canvas.parentElement) {
+      resizeObserver = new ResizeObserver(() => {
+        handleResize();
+      });
+      resizeObserver.observe(canvas.parentElement);
+    }
+
+    window.addEventListener('resize', handleResize);
 
     let offset = 0;
     const render = () => {
       const width = canvas.width;
       const height = canvas.height;
       
+      if (width === 0 || height === 0) {
+        animationRef.current = requestAnimationFrame(render);
+        return;
+      }
+
       ctx.clearRect(0, 0, width, height);
 
       // Get styles
@@ -86,7 +104,10 @@ export default function Visualizer() {
     render();
 
     return () => {
-      window.removeEventListener('resize', resizeCanvas);
+      window.removeEventListener('resize', handleResize);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }

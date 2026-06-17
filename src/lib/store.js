@@ -1,8 +1,91 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 const PlayerContext = createContext(null);
+
+// Zustand Persistent Store Definition
+const usePlayerStore = create(
+  persist(
+    (set) => ({
+      user: null,
+      token: null,
+      currentSong: null,
+      isPlaying: false,
+      queue: [],
+      currentIndex: -1,
+      volume: 0.8,
+      playbackSpeed: 1,
+      isMuted: false,
+      shuffle: false,
+      repeat: 'none',
+      theme: 'cyber',
+      showTerminal: false,
+      terminalTab: 'console',
+      logs: [
+        '[SYSTEM] Initializing 404player Kernel...',
+        '[SYSTEM] Loading audio decoders... OK',
+        '[SYSTEM] Theme set to CYBERPUNK NEON',
+        '[SYSTEM] Ready. Enter developer guest mode or log in.'
+      ],
+      favorites: [],
+      playlists: [],
+      downloads: [],
+      history: [],
+      toasts: [],
+      confirmModal: { isOpen: false, title: '', message: '', onConfirm: null, variant: 'default', confirmLabel: '' },
+
+      // State setters
+      setUser: (user) => set({ user }),
+      setToken: (token) => set({ token }),
+      setCurrentSong: (currentSong) => set({ currentSong }),
+      setIsPlaying: (isPlaying) => set({ isPlaying }),
+      setQueue: (queue) => set({ queue }),
+      setCurrentIndex: (currentIndex) => set({ currentIndex }),
+      setVolume: (volume) => set({ volume }),
+      setPlaybackSpeed: (playbackSpeed) => set({ playbackSpeed }),
+      setIsMuted: (isMuted) => set({ isMuted }),
+      setShuffle: (shuffle) => set({ shuffle }),
+      setRepeat: (repeat) => set({ repeat }),
+      setTheme: (theme) => set({ theme }),
+      setShowTerminal: (showTerminal) => set({ showTerminal }),
+      setTerminalTab: (terminalTab) => set({ terminalTab }),
+      setLogs: (logs) => set({ logs }),
+      setFavorites: (favorites) => set({ favorites }),
+      setPlaylists: (playlists) => set({ playlists }),
+      setDownloads: (downloads) => set({ downloads }),
+      setHistory: (history) => set({ history }),
+      setToasts: (toasts) => set({ toasts }),
+      setConfirmModal: (confirmModal) => set({ confirmModal }),
+    }),
+    {
+      name: '404player-store-v1',
+      partialize: (state) => ({
+        user: state.user,
+        token: state.token,
+        currentSong: state.currentSong,
+        isPlaying: state.isPlaying,
+        queue: state.queue,
+        currentIndex: state.currentIndex,
+        volume: state.volume,
+        playbackSpeed: state.playbackSpeed,
+        isMuted: state.isMuted,
+        shuffle: state.shuffle,
+        repeat: state.repeat,
+        theme: state.theme,
+        showTerminal: state.showTerminal,
+        terminalTab: state.terminalTab,
+        logs: state.logs,
+        favorites: state.favorites,
+        playlists: state.playlists,
+        downloads: state.downloads,
+        history: state.history,
+      }),
+    }
+  )
+);
 
 // Safe haptic feedback helper
 const haptic = (ms = 25) => {
@@ -12,39 +95,81 @@ const haptic = (ms = 25) => {
 };
 
 export function PlayerProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
-  const [currentSong, setCurrentSong] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [queue, setQueue] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(-1);
-  const [volume, setVolumeState] = useState(0.8);
-  const [playbackSpeed, setPlaybackSpeedState] = useState(1);
-  const [isMuted, setIsMuted] = useState(false);
-  const [shuffle, setShuffle] = useState(false);
-  const [repeat, setRepeat] = useState('none'); // 'none' | 'all' | 'one'
-  const [theme, setThemeState] = useState('cyber'); // 'cyber' | 'dark' | 'github'
-  const [showTerminal, setShowTerminal] = useState(false);
-  const [terminalTab, setTerminalTab] = useState('console');
-  const [logs, setLogs] = useState([
-    '[SYSTEM] Initializing 404player Kernel...',
-    '[SYSTEM] Loading audio decoders... OK',
-    '[SYSTEM] Theme set to CYBERPUNK NEON',
-    '[SYSTEM] Ready. Enter developer guest mode or log in.'
-  ]);
+  const store = usePlayerStore();
+  const [isHydrated, setIsHydrated] = useState(false);
 
-  const [favorites, setFavorites] = useState([]);
-  const [playlists, setPlaylists] = useState([]);
-  const [downloads, setDownloads] = useState([]);
-  const [history, setHistory] = useState([]);
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setIsHydrated(true);
+    }, 0);
+    return () => clearTimeout(t);
+  }, []);
 
-  // Toast notification state
-  const [toasts, setToasts] = useState([]);
+  // Use rehydrated store values on the client, and defaults on the server/first paint
+  const user = isHydrated ? store.user : null;
+  const setUser = store.setUser;
+
+  const token = isHydrated ? store.token : null;
+  const setToken = store.setToken;
+
+  const currentSong = isHydrated ? store.currentSong : null;
+  const setCurrentSong = store.setCurrentSong;
+
+  const isPlaying = isHydrated ? store.isPlaying : false;
+  const setIsPlaying = store.setIsPlaying;
+
+  const queue = isHydrated ? store.queue : [];
+  const setQueue = store.setQueue;
+
+  const currentIndex = isHydrated ? store.currentIndex : -1;
+  const setCurrentIndex = store.setCurrentIndex;
+
+  const volume = isHydrated ? store.volume : 0.8;
+  const setVolumeState = store.setVolume;
+
+  const playbackSpeed = isHydrated ? store.playbackSpeed : 1;
+  const setPlaybackSpeedState = store.setPlaybackSpeed;
+
+  const isMuted = isHydrated ? store.isMuted : false;
+  const setIsMuted = store.setIsMuted;
+
+  const shuffle = isHydrated ? store.shuffle : false;
+  const setShuffle = store.setShuffle;
+
+  const repeat = isHydrated ? store.repeat : 'none';
+  const setRepeat = store.setRepeat;
+
+  const theme = isHydrated ? store.theme : 'cyber';
+  const setThemeState = store.setTheme;
+
+  const showTerminal = isHydrated ? store.showTerminal : false;
+  const setShowTerminal = store.setShowTerminal;
+
+  const terminalTab = isHydrated ? store.terminalTab : 'console';
+  const setTerminalTab = store.setTerminalTab;
+
+  const logs = isHydrated ? store.logs : [];
+  const setLogs = store.setLogs;
+
+  const favorites = isHydrated ? store.favorites : [];
+  const setFavorites = store.setFavorites;
+
+  const playlists = isHydrated ? store.playlists : [];
+  const setPlaylists = store.setPlaylists;
+
+  const downloads = isHydrated ? store.downloads : [];
+  const setDownloads = store.setDownloads;
+
+  const history = isHydrated ? store.history : [];
+  const setHistory = store.setHistory;
+
+  const toasts = store.toasts;
+  const setToasts = store.setToasts;
+
+  const confirmModal = store.confirmModal;
+  const setConfirmModal = store.setConfirmModal;
+
   const toastTimersRef = useRef({});
-
-  // Confirm modal state
-  const [confirmModal, setConfirmModal] = useState({ isOpen: false, title: '', message: '', onConfirm: null, variant: 'default', confirmLabel: '' });
-
   const audioRef = useRef(null);
 
   // Initialize audio element synchronously on first render (client-side)
@@ -58,17 +183,23 @@ export function PlayerProvider({ children }) {
   const addToast = useCallback((message, type = 'info') => {
     const id = Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
     haptic(30);
-    setToasts(prev => [{ id, message, type }, ...prev].slice(0, 5));
+    usePlayerStore.setState(state => ({
+      toasts: [{ id, message, type }, ...state.toasts].slice(0, 5)
+    }));
 
     // Auto-dismiss after 3.5s
     toastTimersRef.current[id] = setTimeout(() => {
-      setToasts(prev => prev.filter(t => t.id !== id));
+      usePlayerStore.setState(state => ({
+        toasts: state.toasts.filter(t => t.id !== id)
+      }));
       delete toastTimersRef.current[id];
     }, 3500);
   }, []);
 
   const removeToast = useCallback((id) => {
-    setToasts(prev => prev.filter(t => t.id !== id));
+    usePlayerStore.setState(state => ({
+      toasts: state.toasts.filter(t => t.id !== id)
+    }));
     if (toastTimersRef.current[id]) {
       clearTimeout(toastTimersRef.current[id]);
       delete toastTimersRef.current[id];
@@ -84,13 +215,13 @@ export function PlayerProvider({ children }) {
     setConfirmModal({ isOpen: false, title: '', message: '', onConfirm: null, variant: 'default', confirmLabel: '' });
   }, []);
 
-
-
   // Add system console log
-  const addLog = (text) => {
+  const addLog = useCallback((text) => {
     const timestamp = new Date().toLocaleTimeString();
-    setLogs(prev => [...prev.slice(-99), `[${timestamp}] ${text}`]);
-  };
+    usePlayerStore.setState(state => ({
+      logs: [...state.logs.slice(-99), `[${timestamp}] ${text}`]
+    }));
+  }, []);
 
   // Fetch logged in user details
   const fetchMe = async (authToken) => {
@@ -106,11 +237,9 @@ export function PlayerProvider({ children }) {
       } else {
         localStorage.removeItem('404_token');
         setToken(null);
-        loadGuestData();
       }
     } catch (err) {
       console.error(err);
-      loadGuestData();
     }
   };
 
@@ -147,19 +276,6 @@ export function PlayerProvider({ children }) {
     }
   };
 
-  // Load guest local state
-  const loadGuestData = () => {
-    const localHistory = JSON.parse(localStorage.getItem('404_guest_history') || '[]');
-    setHistory(localHistory);
-    const localFavorites = JSON.parse(localStorage.getItem('404_guest_favorites') || '[]');
-    setFavorites(localFavorites);
-    const localPlaylists = JSON.parse(localStorage.getItem('404_guest_playlists') || '[]');
-    setPlaylists(localPlaylists);
-    const localDownloads = JSON.parse(localStorage.getItem('404_guest_downloads') || '[]');
-    setDownloads(localDownloads);
-    addLog('[AUTH] Guest compilation mounted. Profile data stored locally.');
-  };
-
   // User Actions
   const login = (userData, authToken) => {
     setUser(userData);
@@ -182,13 +298,37 @@ export function PlayerProvider({ children }) {
         localStorage.removeItem('404_token');
         addLog('[AUTH] User logged out. Switching back to guest session.');
         addToast('Session terminated. Guest mode active.', 'info');
-        loadGuestData();
       },
     });
   };
 
+  // Sync Database / LocalStorage helpers
+  const addSongToHistory = useCallback(async (song) => {
+    const historyItem = { ...song, playedAt: new Date().toISOString() };
+    setHistory(prev => [historyItem, ...prev.filter(item => item.id !== song.id)].slice(0, 50));
+
+    if (user && token) {
+      try {
+        await fetch('/api/history', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(song),
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    } else {
+      const currentHist = JSON.parse(localStorage.getItem('404_guest_history') || '[]');
+      const updatedHist = [historyItem, ...currentHist.filter(item => item.id !== song.id)].slice(0, 50);
+      localStorage.setItem('404_guest_history', JSON.stringify(updatedHist));
+    }
+  }, [user, token]);
+
   // Playback Control Functions
-  const playSong = (song, newQueue = null) => {
+  const playSong = useCallback((song, newQueue = null) => {
     if (!song) return;
     
     addLog(`[PLAYBACK] Mounting: "${song.title}" by "${song.artist}"`);
@@ -223,9 +363,9 @@ export function PlayerProvider({ children }) {
 
     // Record listening history
     addSongToHistory(song);
-  };
+  }, [queue, audioRef, addLog, addSongToHistory]);
 
-  const togglePlay = () => {
+  const togglePlay = useCallback(() => {
     if (!currentSong) return;
     haptic(15);
     const nextPlaying = !isPlaying;
@@ -242,9 +382,9 @@ export function PlayerProvider({ children }) {
       }
     }
     addLog(`[PLAYBACK] Play state toggled to: ${nextPlaying ? 'PLAYING' : 'PAUSED'}`);
-  };
+  }, [currentSong, isPlaying, audioRef, addLog]);
 
-  const nextSong = () => {
+  const nextSong = useCallback(() => {
     if (queue.length === 0) return;
     
     let nextIdx = currentIndex + 1;
@@ -263,9 +403,9 @@ export function PlayerProvider({ children }) {
       setIsPlaying(false);
       addLog('[PLAYBACK] End of queue queue stack reached.');
     }
-  };
+  }, [queue, currentIndex, shuffle, repeat, addLog]);
 
-  const prevSong = () => {
+  const prevSong = useCallback(() => {
     if (queue.length === 0) return;
 
     let prevIdx = currentIndex - 1;
@@ -277,7 +417,7 @@ export function PlayerProvider({ children }) {
     setCurrentSong(queue[prevIdx]);
     setIsPlaying(true);
     addLog(`[PLAYBACK] Prev track triggered: "${queue[prevIdx].title}"`);
-  };
+  }, [queue, currentIndex, repeat, addLog]);
 
   const addToQueue = (song) => {
     if (!song) return;
@@ -340,29 +480,6 @@ export function PlayerProvider({ children }) {
   };
 
   // Sync Database / LocalStorage helpers
-  const addSongToHistory = async (song) => {
-    const historyItem = { ...song, playedAt: new Date().toISOString() };
-    setHistory(prev => [historyItem, ...prev.filter(item => item.id !== song.id)].slice(0, 50));
-
-    if (user && token) {
-      try {
-        await fetch('/api/history', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(song),
-        });
-      } catch (e) {
-        console.error(e);
-      }
-    } else {
-      const currentHist = JSON.parse(localStorage.getItem('404_guest_history') || '[]');
-      const updatedHist = [historyItem, ...currentHist.filter(item => item.id !== song.id)].slice(0, 50);
-      localStorage.setItem('404_guest_history', JSON.stringify(updatedHist));
-    }
-  };
 
   const toggleFavorite = async (song) => {
     const isFav = favorites.some(f => f.id === song.id);
@@ -575,29 +692,42 @@ export function PlayerProvider({ children }) {
     };
   }, []);
 
-  // Initialize audio element on mount
+  // Initialize audio element / authenticate user on store hydration
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedVolume = localStorage.getItem('404_volume');
-      const savedSpeed = localStorage.getItem('404_speed');
-      const savedTheme = localStorage.getItem('404_theme');
-      const savedToken = localStorage.getItem('404_token');
+    if (isHydrated) {
+      // Legacy migration check on first launch
+      const legacyToken = localStorage.getItem('404_token');
+      const activeToken = token || legacyToken;
 
-      setTimeout(() => {
-        if (savedVolume !== null) setVolumeState(parseFloat(savedVolume));
-        if (savedSpeed !== null) setPlaybackSpeedState(parseFloat(savedSpeed));
-        if (savedTheme !== null) setThemeState(savedTheme);
+      if (legacyToken && !token) {
+        setToken(legacyToken);
+      }
 
-        if (savedToken) {
-          setToken(savedToken);
-          fetchMe(savedToken);
-        } else {
-          // Load offline guest items
-          loadGuestData();
+      if (activeToken) {
+        fetchMe(activeToken);
+      } else {
+        // Migrate legacy guest data to Zustand store if present and store is empty
+        const legacyFavs = localStorage.getItem('404_guest_favorites');
+        if (legacyFavs && favorites.length === 0) {
+          setFavorites(JSON.parse(legacyFavs));
         }
-      }, 0);
+        const legacyPlaylists = localStorage.getItem('404_guest_playlists');
+        if (legacyPlaylists && playlists.length === 0) {
+          setPlaylists(JSON.parse(legacyPlaylists));
+        }
+        const legacyHistory = localStorage.getItem('404_guest_history');
+        if (legacyHistory && history.length === 0) {
+          setHistory(JSON.parse(legacyHistory));
+        }
+        const legacyDownloads = localStorage.getItem('404_guest_downloads');
+        if (legacyDownloads && downloads.length === 0) {
+          setDownloads(JSON.parse(legacyDownloads));
+        }
+
+        addLog('[AUTH] Offline guest workspace mounted. Profile data stored locally.');
+      }
     }
-  }, []);
+  }, [isHydrated]);
 
   // Sync theme to body element
   useEffect(() => {
@@ -648,6 +778,40 @@ export function PlayerProvider({ children }) {
       active = false;
     };
   }, [currentSong]);
+
+  // Proactive background pre-fetcher for the next track in the queue
+  useEffect(() => {
+    if (queue.length === 0 || currentIndex === -1) return;
+    const nextIdx = currentIndex + 1;
+    if (nextIdx >= queue.length) return;
+
+    const nextSongItem = queue[nextIdx];
+    if (!nextSongItem || nextSongItem.url) return;
+
+    let active = true;
+    const prefetchNext = async () => {
+      try {
+        const res = await fetch(`/api/songs/details?id=${nextSongItem.id}&type=song`);
+        if (res.ok && active) {
+          const data = await res.json();
+          if (data.song && data.song.url) {
+            const resolved = data.song;
+            // Update the next song inside the queue state to cache its stream URL
+            setQueue(prev => prev.map((s, idx) => idx === nextIdx ? { ...s, url: resolved.url } : s));
+            addLog(`[PLAYBACK] Proactively pre-fetched stream URL for next track: "${resolved.title}"`);
+          }
+        }
+      } catch (e) {
+        console.error('Pre-fetch failed:', e);
+      }
+    };
+
+    prefetchNext();
+
+    return () => {
+      active = false;
+    };
+  }, [queue, currentIndex, addLog]);
 
   useEffect(() => {
     if (!audioRef.current || !currentSong?.url) return;
@@ -707,7 +871,7 @@ export function PlayerProvider({ children }) {
         audioRef.current.removeEventListener('error', handleError);
       }
     };
-  }, [queue, currentIndex, repeat, currentSong]);
+  }, [queue, currentIndex, repeat, currentSong, nextSong]);
 
   return (
     <PlayerContext.Provider

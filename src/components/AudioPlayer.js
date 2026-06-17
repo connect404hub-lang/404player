@@ -450,7 +450,7 @@ export default function AudioPlayer() {
                     <div className={`${mobileTab === 'visualizer' ? 'flex' : 'hidden'} md:flex flex-col justify-between gap-6 flex-1 md:w-1/3 overflow-hidden`}>
                       <div className="flex-1 bg-white/[0.01] border border-white/[0.03] rounded-2xl p-5 flex flex-col gap-3 relative min-h-[180px]">
                         <div className="absolute top-4 left-4 text-[9px] text-white/30 uppercase tracking-widest font-bold font-mono">Visualizer.exe</div>
-                        <div className="w-full h-full flex items-center justify-center pt-6">
+                        <div className="w-full flex-1 flex items-center justify-center pt-6 relative min-h-[140px]">
                           <Visualizer />
                         </div>
                       </div>
