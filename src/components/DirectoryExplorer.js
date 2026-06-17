@@ -112,7 +112,7 @@ export default function DirectoryExplorer({ id, type, onClose }) {
         <div className="h-14 bg-bg-tertiary border-b border-border-color/80 px-4 md:px-6 flex items-center justify-between z-10 flex-shrink-0">
           <div className="flex items-center gap-2">
             <Cpu className="text-accent animate-pulse" size={14} />
-            <span className="text-[10px] text-text-secondary uppercase tracking-wider">// DIR_EXPLORER.exe --inspect</span>
+            <span className="text-[10px] text-text-secondary uppercase tracking-wider">{"// DIR_EXPLORER.exe --inspect"}</span>
           </div>
           <button 
             onClick={onClose}

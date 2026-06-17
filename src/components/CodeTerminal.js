@@ -27,30 +27,45 @@ export default function CodeTerminal() {
 
   // Fetch lyrics when song changes
   useEffect(() => {
+    let active = true;
+
     if (!currentSong) {
-      setLyrics('');
-      return;
+      const timer = setTimeout(() => {
+        if (active) setLyrics('');
+      }, 0);
+      return () => {
+        active = false;
+        clearTimeout(timer);
+      };
     }
 
     const fetchLyrics = async () => {
+      if (!active) return;
       setLoadingLyrics(true);
       setLyrics('');
       try {
         const res = await fetch(`/api/songs/lyrics?id=${currentSong.id}`);
         if (res.ok) {
           const data = await res.json();
-          setLyrics(data.lyrics);
+          if (active) setLyrics(data.lyrics);
         } else {
-          setLyrics('[SYSTEM WARNING] Unable to fetch lyrics stream from provider.');
+          if (active) setLyrics('[SYSTEM WARNING] Unable to fetch lyrics stream from provider.');
         }
       } catch (err) {
-        setLyrics('[SYSTEM ERROR] Connection failure while loading lyrics.');
+        if (active) setLyrics('[SYSTEM ERROR] Connection failure while loading lyrics.');
       } finally {
-        setLoadingLyrics(false);
+        if (active) setLoadingLyrics(false);
       }
     };
 
-    fetchLyrics();
+    const timer = setTimeout(() => {
+      fetchLyrics();
+    }, 0);
+
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
   }, [currentSong]);
 
   const moveQueueItem = (index, direction) => {

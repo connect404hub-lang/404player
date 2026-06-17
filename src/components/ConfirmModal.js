@@ -66,7 +66,7 @@ export default function ConfirmModal() {
               <div className="flex items-center gap-2">
                 <Terminal size={12} className={isDestructive ? 'text-red-400' : 'text-accent'} />
                 <span className="text-[10px] text-text-secondary uppercase tracking-wider font-bold">
-                  // confirm_action.sh
+                  {"// confirm_action.sh"}
                 </span>
               </div>
               <button

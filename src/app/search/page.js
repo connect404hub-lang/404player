@@ -68,7 +68,7 @@ export default function SearchPage() {
       <div className="flex items-center justify-between border-b border-border-color pb-3">
         <div className="flex items-center gap-2">
           <Terminal className="text-accent" size={14} />
-          <span className="text-[11px] text-text-secondary">// SOURCE: ROOT/SEARCH.sh</span>
+          <span className="text-[11px] text-text-secondary">{"// SOURCE: ROOT/SEARCH.sh"}</span>
         </div>
       </div>
 

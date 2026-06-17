@@ -37,7 +37,7 @@ export default function AppShell({ children }) {
         </header>
 
         {/* Main scrollable workspace - Added bottom padding for Player */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden relative pb-28 md:pb-24">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden relative pb-[148px] md:pb-24">
           <div className="w-full p-4 md:p-8">
             {children}
           </div>

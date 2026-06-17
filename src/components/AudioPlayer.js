@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { usePlayer } from '@/lib/store';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -21,6 +22,18 @@ export default function AudioPlayer() {
   const [duration, setDuration] = useState(0);
   const [isExpanded, setIsExpanded] = useState(false);
   const [speedDropdown, setSpeedDropdown] = useState(false);
+  const [mobileTab, setMobileTab] = useState('core'); // 'core' | 'lyrics' | 'visualizer'
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setMounted(true);
+    }, 0);
+    return () => {
+      clearTimeout(t);
+      setMounted(false);
+    };
+  }, []);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -284,148 +297,231 @@ export default function AudioPlayer() {
       </div>
 
       {/* FULLSCREEN IMMERSIVE PLAYER */}
-      <AnimatePresence>
-        {isExpanded && currentSong && (
-          <motion.div
-            initial={{ opacity: 0, y: '100%' }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: '100%' }}
-            transition={{ type: 'spring', stiffness: 260, damping: 28 }}
-            className="fixed inset-0 bg-[#04060b] z-50 flex flex-col select-none overflow-hidden"
-          >
-            {/* Ambient blur backdrops */}
-            <div 
-              className="absolute inset-0 bg-cover bg-center opacity-[0.05] filter blur-[100px] scale-110 pointer-events-none"
-              style={{ backgroundImage: `url(${currentSong.image})` }}
-            />
-
-            {/* Header */}
-            <div className="h-16 w-full bg-[#080b12]/30 border-b border-white/[0.03] flex items-center justify-between px-6 z-10">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-                <span className="text-[10px] text-white/40 uppercase tracking-widest font-bold font-mono">Kernel Core Sound Deck</span>
-              </div>
-              <button 
-                onClick={() => setIsExpanded(false)}
-                className="px-4 py-1.5 bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.05] rounded-xl text-xs text-white/50 hover:text-accent cursor-pointer transition-all"
-              >
-                Close (Esc)
-              </button>
-            </div>
-
-            {/* Main Area */}
-            <div className="flex-1 flex flex-col md:flex-row p-6 md:p-12 gap-8 items-stretch justify-between overflow-y-auto md:overflow-hidden z-10 pb-24 md:pb-12">
-              
-              {/* Col 1: Disc Visualizer & Info */}
-              <div className="flex flex-col justify-center items-center gap-6 md:w-1/3">
-                <div className="relative w-56 h-56 sm:w-64 sm:h-64 rounded-full overflow-hidden border border-white/[0.06] shadow-2xl flex-shrink-0 group">
-                  <div className="absolute inset-0 rounded-full border-[10px] border-black/35 z-10 pointer-events-none" />
-                  <div className="absolute inset-0 rounded-full border-[22px] border-black/15 z-10 pointer-events-none" />
-                  <img 
-                    src={currentSong.image || ''} 
-                    alt="" 
-                    className={`w-full h-full object-cover rounded-full vinyl-rotation ${isPlaying ? '' : 'vinyl-rotation-paused'}`} 
+      {mounted && typeof document !== 'undefined'
+        ? createPortal(
+            <AnimatePresence>
+              {isExpanded && currentSong && (
+                <motion.div
+                  initial={{ opacity: 0, y: '100%' }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: '100%' }}
+                  transition={{ type: 'spring', stiffness: 260, damping: 28 }}
+                  className="fixed inset-0 bg-[#04060b] z-50 flex flex-col select-none overflow-hidden"
+                >
+                  {/* Ambient blur backdrops */}
+                  <div 
+                    className="absolute inset-0 bg-cover bg-center opacity-[0.05] filter blur-[100px] scale-110 pointer-events-none"
+                    style={{ backgroundImage: `url(${currentSong.image})` }}
                   />
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-bg-primary border border-white/[0.08] z-20 flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-accent" />
-                  </div>
-                </div>
 
-                <div className="text-center mt-2">
-                  <h2 className="text-lg md:text-xl font-bold text-white/95 truncate px-4">{currentSong.title}</h2>
-                  <p className="text-xs text-accent mt-1">{currentSong.artist}</p>
-                </div>
-              </div>
-
-              {/* Col 2: Lyrics Stream & Controller */}
-              <div className="flex flex-col justify-between gap-6 md:w-1/3 overflow-hidden">
-                <div className="flex-1 bg-white/[0.01] border border-white/[0.03] rounded-2xl p-6 overflow-y-auto flex flex-col items-center justify-center relative min-h-[220px]">
-                  <div className="absolute top-4 left-4 text-[9px] text-white/30 uppercase tracking-widest font-bold font-mono">Stream lyrics.txt</div>
-                  <div className="w-full overflow-y-auto max-h-[85%] text-xs text-white/70 leading-loose whitespace-pre-line text-center scrollbar-none font-medium">
-                    {loadingLyrics ? (
-                      <span className="text-accent animate-pulse">Compiling lyrics file...</span>
-                    ) : lyricsText ? (
-                      lyricsText
-                    ) : (
-                      <span className="text-white/20 italic">No lyrics file compiled for track</span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Dashboard Panel */}
-                <div className="bg-white/[0.02] border border-white/[0.03] rounded-2xl p-5 flex flex-col gap-4 flex-shrink-0">
-                  <div className="flex flex-col gap-2">
-                    <div className="flex-1 relative h-1.5 flex items-center">
-                      <input 
-                        type="range"
-                        min={0}
-                        max={duration || 100}
-                        value={currentTime}
-                        onChange={handleSeek}
-                        className="w-full h-1.5 bg-white/[0.04] rounded-lg appearance-none cursor-pointer accent-accent relative z-10"
-                      />
-                      <div 
-                        className="absolute left-0 top-0 bottom-0 bg-accent rounded-l-lg pointer-events-none" 
-                        style={{ width: `${activeProgressPercent}%` }}
-                      />
+                  {/* Header */}
+                  <div className="h-16 w-full bg-[#080b12]/30 border-b border-white/[0.03] flex items-center justify-between px-6 z-10">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
+                      <span className="text-[10px] text-white/40 uppercase tracking-widest font-bold font-mono">Kernel Core Sound Deck</span>
                     </div>
-                    <div className="flex justify-between text-[10px] text-white/30 font-semibold font-mono">
-                      <span>{formatTime(currentTime)}</span>
-                      <span>{formatTime(duration)}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between px-2">
-                    <button onClick={toggleShuffle} className={`p-2 transition-colors ${shuffle ? 'text-accent' : 'text-white/30 hover:text-white/60'}`}>
-                      <Shuffle size={15} />
-                    </button>
-                    <div className="flex items-center gap-4">
-                      <button onClick={prevSong} className="p-2 text-white/30 hover:text-white/60">
-                        <SkipBack size={18} fill="currentColor" />
-                      </button>
-                      <motion.button 
-                        onClick={() => { haptic(25); togglePlay(); }}
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        className="w-12 h-12 rounded-full bg-accent text-bg-primary flex items-center justify-center cursor-pointer shadow-lg shadow-accent/20"
-                      >
-                        {isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" className="ml-0.5" />}
-                      </motion.button>
-                      <button onClick={nextSong} className="p-2 text-white/30 hover:text-white/60">
-                        <SkipForward size={18} fill="currentColor" />
-                      </button>
-                    </div>
-                    <button onClick={toggleRepeat} className={`p-2 relative transition-colors ${repeat !== 'none' ? 'text-accent' : 'text-white/30 hover:text-white/60'}`}>
-                      <RotateCw size={15} />
-                      {repeat === 'one' && <span className="absolute top-0 right-0 text-[7px] font-bold bg-accent text-bg-primary w-2.5 h-2.5 rounded-full flex items-center justify-center">1</span>}
+                    <button 
+                      onClick={() => setIsExpanded(false)}
+                      className="px-4 py-1.5 bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.05] rounded-xl text-xs text-white/50 hover:text-accent cursor-pointer transition-all"
+                    >
+                      Close (Esc)
                     </button>
                   </div>
-                </div>
-              </div>
 
-              {/* Col 3: Visualizer & Log Feed */}
-              <div className="flex flex-col justify-between gap-6 md:w-1/3 overflow-hidden">
-                <div className="flex-1 bg-white/[0.01] border border-white/[0.03] rounded-2xl p-5 flex flex-col gap-3 relative min-h-[180px]">
-                  <div className="absolute top-4 left-4 text-[9px] text-white/30 uppercase tracking-widest font-bold font-mono">Visualizer.exe</div>
-                  <div className="w-full h-full flex items-center justify-center pt-6">
-                    <Visualizer />
+                  {/* Mobile Tabs */}
+                  <div className="md:hidden flex border border-white/[0.04] p-1 mx-6 mt-2 bg-white/[0.02] rounded-xl font-mono text-[9px] font-bold z-10">
+                    <button 
+                      onClick={() => setMobileTab('core')}
+                      className={`flex-1 py-2 text-center rounded-lg uppercase tracking-wider transition-all cursor-pointer ${
+                        mobileTab === 'core' ? 'bg-accent text-bg-primary shadow-[0_0_8px_rgba(var(--accent-rgb),0.2)]' : 'text-white/40 hover:text-white/75'
+                      }`}
+                    >
+                      Node Core
+                    </button>
+                    <button 
+                      onClick={() => setMobileTab('lyrics')}
+                      className={`flex-1 py-2 text-center rounded-lg uppercase tracking-wider transition-all cursor-pointer ${
+                        mobileTab === 'lyrics' ? 'bg-accent text-bg-primary shadow-[0_0_8px_rgba(var(--accent-rgb),0.2)]' : 'text-white/40 hover:text-white/75'
+                      }`}
+                    >
+                      Lyrics.txt
+                    </button>
+                    <button 
+                      onClick={() => setMobileTab('visualizer')}
+                      className={`flex-1 py-2 text-center rounded-lg uppercase tracking-wider transition-all cursor-pointer ${
+                        mobileTab === 'visualizer' ? 'bg-accent text-bg-primary shadow-[0_0_8px_rgba(var(--accent-rgb),0.2)]' : 'text-white/40 hover:text-white/75'
+                      }`}
+                    >
+                      Visualizer
+                    </button>
                   </div>
-                </div>
 
-                <div className="h-32 flex flex-col gap-2 flex-shrink-0">
-                  <span className="text-[10px] text-accent font-bold uppercase tracking-wider font-mono">diagnostics_feed.log</span>
-                  <div className="flex-1 overflow-y-auto flex flex-col gap-1 pr-2 bg-white/[0.01] border border-white/[0.03] rounded-xl p-3 text-[10px] text-white/40 font-semibold font-mono">
-                    {logs.slice(-5).map((log, i) => (
-                      <div key={i} className="truncate">{log}</div>
-                    ))}
+                  {/* Main Area */}
+                  <div className="flex-1 flex flex-col md:flex-row p-4 md:p-12 gap-6 items-stretch justify-between overflow-hidden z-10 pb-6 md:pb-12">
+                    
+                    {/* Col 1: Disc Visualizer & Info */}
+                    <div className={`${mobileTab === 'core' ? 'flex' : 'hidden'} md:flex flex-col justify-center items-center gap-6 flex-1 md:w-1/3`}>
+                      <div className="relative w-52 h-52 sm:w-64 sm:h-64 rounded-full overflow-hidden border border-white/[0.06] shadow-2xl flex-shrink-0 group">
+                        <div className="absolute inset-0 rounded-full border-[10px] border-black/35 z-10 pointer-events-none" />
+                        <div className="absolute inset-0 rounded-full border-[22px] border-black/15 z-10 pointer-events-none" />
+                        <img 
+                          src={currentSong.image || ''} 
+                          alt="" 
+                          className={`w-full h-full object-cover rounded-full vinyl-rotation ${isPlaying ? '' : 'vinyl-rotation-paused'}`} 
+                        />
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-bg-primary border border-white/[0.08] z-20 flex items-center justify-center">
+                          <div className="w-2 h-2 rounded-full bg-accent" />
+                        </div>
+                      </div>
+
+                      <div className="text-center mt-2">
+                        <h2 className="text-lg md:text-xl font-bold text-white/95 truncate px-4 max-w-[280px] sm:max-w-xs">{currentSong.title}</h2>
+                        <p className="text-xs text-accent mt-1">{currentSong.artist}</p>
+                      </div>
+                    </div>
+
+                    {/* Col 2: Lyrics Stream & Controller */}
+                    <div className={`${mobileTab === 'lyrics' ? 'flex' : 'hidden'} md:flex flex-col justify-between gap-6 flex-1 md:w-1/3 overflow-hidden`}>
+                      <div className="flex-1 bg-white/[0.01] border border-white/[0.03] rounded-2xl p-6 overflow-y-auto flex flex-col items-center justify-center relative min-h-[220px]">
+                        <div className="absolute top-4 left-4 text-[9px] text-white/30 uppercase tracking-widest font-bold font-mono">Stream lyrics.txt</div>
+                        <div className="w-full overflow-y-auto max-h-[85%] text-xs text-white/70 leading-loose whitespace-pre-line text-center scrollbar-none font-medium">
+                          {loadingLyrics ? (
+                            <span className="text-accent animate-pulse">Compiling lyrics file...</span>
+                          ) : lyricsText ? (
+                            lyricsText
+                          ) : (
+                            <span className="text-white/20 italic">No lyrics file compiled for track</span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Dashboard Panel - desktop only */}
+                      <div className="hidden md:flex bg-white/[0.02] border border-white/[0.03] rounded-2xl p-5 flex flex-col gap-4 flex-shrink-0">
+                        <div className="flex flex-col gap-2">
+                          <div className="flex-1 relative h-1.5 flex items-center">
+                            <input 
+                              type="range"
+                              min={0}
+                              max={duration || 100}
+                              value={currentTime}
+                              onChange={handleSeek}
+                              className="w-full h-1.5 bg-white/[0.04] rounded-lg appearance-none cursor-pointer accent-accent relative z-10"
+                            />
+                            <div 
+                              className="absolute left-0 top-0 bottom-0 bg-accent rounded-l-lg pointer-events-none" 
+                              style={{ width: `${activeProgressPercent}%` }}
+                            />
+                          </div>
+                          <div className="flex justify-between text-[10px] text-white/30 font-semibold font-mono">
+                            <span>{formatTime(currentTime)}</span>
+                            <span>{formatTime(duration)}</span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between px-2">
+                          <button onClick={toggleShuffle} className={`p-2 transition-colors ${shuffle ? 'text-accent' : 'text-white/30 hover:text-white/60'}`}>
+                            <Shuffle size={15} />
+                          </button>
+                          <div className="flex items-center gap-4">
+                            <button onClick={prevSong} className="p-2 text-white/30 hover:text-white/60">
+                              <SkipBack size={18} fill="currentColor" />
+                            </button>
+                            <motion.button 
+                              onClick={() => { haptic(25); togglePlay(); }}
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              className="w-12 h-12 rounded-full bg-accent text-bg-primary flex items-center justify-center cursor-pointer shadow-lg shadow-accent/20"
+                            >
+                              {isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" className="ml-0.5" />}
+                            </motion.button>
+                            <button onClick={nextSong} className="p-2 text-white/30 hover:text-white/60">
+                              <SkipForward size={18} fill="currentColor" />
+                            </button>
+                          </div>
+                          <button onClick={toggleRepeat} className={`p-2 relative transition-colors ${repeat !== 'none' ? 'text-accent' : 'text-white/30 hover:text-white/60'}`}>
+                            <RotateCw size={15} />
+                            {repeat === 'one' && <span className="absolute top-0 right-0 text-[7px] font-bold bg-accent text-bg-primary w-2.5 h-2.5 rounded-full flex items-center justify-center">1</span>}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Col 3: Visualizer & Log Feed */}
+                    <div className={`${mobileTab === 'visualizer' ? 'flex' : 'hidden'} md:flex flex-col justify-between gap-6 flex-1 md:w-1/3 overflow-hidden`}>
+                      <div className="flex-1 bg-white/[0.01] border border-white/[0.03] rounded-2xl p-5 flex flex-col gap-3 relative min-h-[180px]">
+                        <div className="absolute top-4 left-4 text-[9px] text-white/30 uppercase tracking-widest font-bold font-mono">Visualizer.exe</div>
+                        <div className="w-full h-full flex items-center justify-center pt-6">
+                          <Visualizer />
+                        </div>
+                      </div>
+
+                      <div className="h-32 flex flex-col gap-2 flex-shrink-0">
+                        <span className="text-[10px] text-accent font-bold uppercase tracking-wider font-mono">diagnostics_feed.log</span>
+                        <div className="flex-1 overflow-y-auto flex flex-col gap-1 pr-2 bg-white/[0.01] border border-white/[0.03] rounded-xl p-3 text-[10px] text-white/40 font-semibold font-mono">
+                          {logs.slice(-5).map((log, i) => (
+                            <div key={i} className="truncate">{log}</div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
                   </div>
-                </div>
-              </div>
 
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                  {/* Mobile Playback Controller Section */}
+                  <div className="md:hidden flex flex-col gap-4 bg-[#080b12]/50 border-t border-white/[0.04] p-6 pb-8 flex-shrink-0 z-20">
+                    <div className="flex flex-col gap-2">
+                      <div className="flex-1 relative h-1.5 flex items-center">
+                        <input 
+                          type="range"
+                          min={0}
+                          max={duration || 100}
+                          value={currentTime}
+                          onChange={handleSeek}
+                          className="w-full h-1.5 bg-white/[0.04] rounded-lg appearance-none cursor-pointer accent-accent relative z-10"
+                        />
+                        <div 
+                          className="absolute left-0 top-0 bottom-0 bg-accent rounded-l-lg pointer-events-none" 
+                          style={{ width: `${activeProgressPercent}%` }}
+                        />
+                      </div>
+                      <div className="flex justify-between text-[10px] text-white/30 font-semibold font-mono">
+                        <span>{formatTime(currentTime)}</span>
+                        <span>{formatTime(duration)}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between px-4">
+                      <button onClick={toggleShuffle} className={`p-2 transition-colors ${shuffle ? 'text-accent' : 'text-white/30'}`}>
+                        <Shuffle size={16} />
+                      </button>
+                      <div className="flex items-center gap-6">
+                        <button onClick={prevSong} className="p-2 text-white/40 active:text-white">
+                          <SkipBack size={20} fill="currentColor" />
+                        </button>
+                        <motion.button 
+                          onClick={() => { haptic(25); togglePlay(); }}
+                          whileTap={{ scale: 0.9 }}
+                          className="w-14 h-14 rounded-full bg-accent text-bg-primary flex items-center justify-center cursor-pointer shadow-lg shadow-accent/20"
+                        >
+                          {isPlaying ? <Pause size={22} fill="currentColor" /> : <Play size={22} fill="currentColor" className="ml-0.5" />}
+                        </motion.button>
+                        <button onClick={nextSong} className="p-2 text-white/40 active:text-white">
+                          <SkipForward size={20} fill="currentColor" />
+                        </button>
+                      </div>
+                      <button onClick={toggleRepeat} className={`p-2 relative transition-colors ${repeat !== 'none' ? 'text-accent' : 'text-white/30'}`}>
+                        <RotateCw size={16} />
+                        {repeat === 'one' && <span className="absolute top-1 right-0 text-[7px] font-bold bg-accent text-bg-primary w-2.5 h-2.5 rounded-full flex items-center justify-center">1</span>}
+                      </button>
+                    </div>
+                  </div>
+
+                </motion.div>
+              )}
+            </AnimatePresence>,
+            document.body
+          )
+        : null}
     </>
   );
 }

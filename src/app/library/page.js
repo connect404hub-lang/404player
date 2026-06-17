@@ -116,7 +116,7 @@ export default function LibraryPage() {
       <div className="flex items-center justify-between border-b border-border-color pb-3">
         <div className="flex items-center gap-2">
           <Terminal className="text-accent" size={14} />
-          <span className="text-[11px] text-text-secondary">// SOURCE: ROOT/LIBRARY.sh</span>
+          <span className="text-[11px] text-text-secondary">{"// SOURCE: ROOT/LIBRARY.sh"}</span>
         </div>
       </div>
 
@@ -260,7 +260,7 @@ export default function LibraryPage() {
               {/* Create Playlist Form Panel */}
               {showPlForm && (
                 <form onSubmit={handleCreatePlaylist} className="p-4 bg-bg-secondary/40 border border-border-color rounded-lg max-w-md flex flex-col gap-3">
-                  <div className="text-[10px] font-bold text-accent uppercase tracking-wider">// New Playlist parameters</div>
+                  <div className="text-[10px] font-bold text-accent uppercase tracking-wider">{"// New Playlist parameters"}</div>
                   
                   <div className="flex flex-col gap-1.5">
                     <label className="text-[9px] text-text-secondary font-bold uppercase">playlist_name</label>
@@ -306,7 +306,7 @@ export default function LibraryPage() {
               {/* Grid lists */}
               {playlists.length === 0 ? (
                 <div className="text-[11px] md:text-xs text-text-secondary italic p-4 border border-dashed border-border-color rounded text-center">
-                  No active playlist folders compiled. Click "mkdir playlist" to initialize one!
+                  {'No active playlist folders compiled. Click "mkdir playlist" to initialize one!'}
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">

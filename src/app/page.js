@@ -32,21 +32,21 @@ function useHomeData() {
   return { data, loading };
 }
 
+const SectionHeader = ({ title, path }) => (
+  <div className="flex items-center justify-between mb-6 border-b border-white/[0.05] pb-3">
+    <div className="flex items-center gap-3">
+      <div className="w-1 h-6 bg-accent shadow-[0_0_10px_var(--accent)]" />
+      <div>
+        <h3 className="text-xs md:text-sm font-black uppercase tracking-[0.2em] text-white/90">{title}</h3>
+        <p className="text-[8px] text-white/20 font-mono mt-0.5">LOCATION: {path}</p>
+      </div>
+    </div>
+  </div>
+);
+
 export default function HomePage() {
   const { data, loading } = useHomeData();
   const [explorerTarget, setExplorerTarget] = useState(null);
-
-  const SectionHeader = ({ title, path }) => (
-    <div className="flex items-center justify-between mb-6 border-b border-white/[0.05] pb-3">
-      <div className="flex items-center gap-3">
-        <div className="w-1 h-6 bg-accent shadow-[0_0_10px_var(--accent)]" />
-        <div>
-          <h3 className="text-xs md:text-sm font-black uppercase tracking-[0.2em] text-white/90">{title}</h3>
-          <p className="text-[8px] text-white/20 font-mono mt-0.5">LOCATION: {path}</p>
-        </div>
-      </div>
-    </div>
-  );
 
   if (loading) {
     return (

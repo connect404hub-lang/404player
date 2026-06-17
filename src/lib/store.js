@@ -47,6 +47,13 @@ export function PlayerProvider({ children }) {
 
   const audioRef = useRef(null);
 
+  // Initialize audio element synchronously on first render (client-side)
+  if (audioRef.current == null) {
+    if (typeof window !== 'undefined') {
+      audioRef.current = new Audio();
+    }
+  }
+
   // Toast helpers
   const addToast = useCallback((message, type = 'info') => {
     const id = Date.now().toString(36) + Math.random().toString(36).substring(2, 6);
@@ -77,117 +84,7 @@ export function PlayerProvider({ children }) {
     setConfirmModal({ isOpen: false, title: '', message: '', onConfirm: null, variant: 'default', confirmLabel: '' });
   }, []);
 
-  // Cleanup toast timers on unmount
-  useEffect(() => {
-    return () => {
-      Object.values(toastTimersRef.current).forEach(clearTimeout);
-    };
-  }, []);
 
-  // Initialize audio element on mount
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      audioRef.current = new Audio();
-      
-      // Load volume and theme from localStorage
-      const savedVolume = localStorage.getItem('404_volume');
-      if (savedVolume !== null) setVolumeState(parseFloat(savedVolume));
-
-      const savedSpeed = localStorage.getItem('404_speed');
-      if (savedSpeed !== null) setPlaybackSpeedState(parseFloat(savedSpeed));
-
-      const savedTheme = localStorage.getItem('404_theme');
-      if (savedTheme !== null) setThemeState(savedTheme);
-
-      const savedToken = localStorage.getItem('404_token');
-      if (savedToken) {
-        setToken(savedToken);
-        fetchMe(savedToken);
-      } else {
-        // Load offline guest items
-        loadGuestData();
-      }
-    }
-  }, []);
-
-  // Sync theme to body element
-  useEffect(() => {
-    if (typeof document !== 'undefined') {
-      document.body.setAttribute('data-theme', theme);
-    }
-  }, [theme]);
-
-
-  // Sync state changes to audio element
-  useEffect(() => {
-    if (!audioRef.current) return;
-    audioRef.current.volume = isMuted ? 0 : volume;
-  }, [volume, isMuted]);
-
-  useEffect(() => {
-    if (!audioRef.current) return;
-    audioRef.current.playbackRate = playbackSpeed;
-  }, [playbackSpeed]);
-
-  useEffect(() => {
-    if (!audioRef.current || !currentSong?.url) return;
-    
-    const wasPlaying = isPlaying;
-    audioRef.current.src = currentSong.url;
-    audioRef.current.load();
-    
-    if (wasPlaying) {
-      audioRef.current.play().catch(e => {
-        addLog(`[ERROR] Audio playback failed to start: ${e.message}`);
-        setIsPlaying(false);
-      });
-    }
-  }, [currentSong]);
-
-  useEffect(() => {
-    if (!audioRef.current) return;
-
-    if (isPlaying) {
-      if (audioRef.current.src) {
-        audioRef.current.play().catch(e => {
-          addLog(`[ERROR] Audio playback failed: ${e.message}`);
-          setIsPlaying(false);
-        });
-      }
-    } else {
-      audioRef.current.pause();
-    }
-  }, [isPlaying]);
-
-  // Audio event listeners
-  useEffect(() => {
-    if (!audioRef.current) return;
-
-    const handleEnded = () => {
-      addLog(`[INFO] Completed playback: "${currentSong?.title}"`);
-      if (repeat === 'one') {
-        audioRef.current.currentTime = 0;
-        audioRef.current.play().catch(() => {});
-      } else {
-        nextSong();
-      }
-    };
-
-    const handleError = (e) => {
-      addLog(`[ERROR] Playback stream failed for: "${currentSong?.title}"`);
-      setIsPlaying(false);
-    };
-
-    audioRef.current.addEventListener('ended', handleEnded);
-    audioRef.current.addEventListener('error', handleError);
-
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.removeEventListener('ended', handleEnded);
-        audioRef.current.removeEventListener('error', handleError);
-      }
-    };
-  }, [queue, currentIndex, repeat, currentSong]);
 
   // Add system console log
   const addLog = (text) => {
@@ -296,6 +193,18 @@ export function PlayerProvider({ children }) {
     
     addLog(`[PLAYBACK] Mounting: "${song.title}" by "${song.artist}"`);
     haptic(20);
+
+    // Bless the audio element synchronously for mobile compatibility
+    if (audioRef.current) {
+      try {
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            audioRef.current.pause();
+          }).catch(() => {});
+        }
+      } catch (e) {}
+    }
     
     let targetQueue = queue;
     if (newQueue) {
@@ -319,8 +228,20 @@ export function PlayerProvider({ children }) {
   const togglePlay = () => {
     if (!currentSong) return;
     haptic(15);
-    setIsPlaying(!isPlaying);
-    addLog(`[PLAYBACK] Play state toggled to: ${!isPlaying ? 'PLAYING' : 'PAUSED'}`);
+    const nextPlaying = !isPlaying;
+    setIsPlaying(nextPlaying);
+
+    if (audioRef.current) {
+      if (nextPlaying) {
+        audioRef.current.play().catch(e => {
+          addLog(`[ERROR] Audio playback failed: ${e.message}`);
+          setIsPlaying(false);
+        });
+      } else {
+        audioRef.current.pause();
+      }
+    }
+    addLog(`[PLAYBACK] Play state toggled to: ${nextPlaying ? 'PLAYING' : 'PAUSED'}`);
   };
 
   const nextSong = () => {
@@ -645,6 +566,148 @@ export function PlayerProvider({ children }) {
       localStorage.setItem('404_guest_playlists', JSON.stringify(updated));
     }
   };
+
+  // Cleanup toast timers on unmount
+  useEffect(() => {
+    const timers = toastTimersRef.current;
+    return () => {
+      Object.values(timers).forEach(clearTimeout);
+    };
+  }, []);
+
+  // Initialize audio element on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedVolume = localStorage.getItem('404_volume');
+      const savedSpeed = localStorage.getItem('404_speed');
+      const savedTheme = localStorage.getItem('404_theme');
+      const savedToken = localStorage.getItem('404_token');
+
+      setTimeout(() => {
+        if (savedVolume !== null) setVolumeState(parseFloat(savedVolume));
+        if (savedSpeed !== null) setPlaybackSpeedState(parseFloat(savedSpeed));
+        if (savedTheme !== null) setThemeState(savedTheme);
+
+        if (savedToken) {
+          setToken(savedToken);
+          fetchMe(savedToken);
+        } else {
+          // Load offline guest items
+          loadGuestData();
+        }
+      }, 0);
+    }
+  }, []);
+
+  // Sync theme to body element
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.body.setAttribute('data-theme', theme);
+    }
+  }, [theme]);
+
+  // Sync state changes to audio element
+  useEffect(() => {
+    if (!audioRef.current) return;
+    audioRef.current.volume = isMuted ? 0 : volume;
+  }, [volume, isMuted]);
+
+  useEffect(() => {
+    if (!audioRef.current) return;
+    audioRef.current.playbackRate = playbackSpeed;
+  }, [playbackSpeed]);
+
+  // Fetch song details if URL is missing (e.g., from global autocomplete search)
+  useEffect(() => {
+    if (!currentSong || currentSong.url) return;
+
+    let active = true;
+    const fetchDetails = async () => {
+      addLog(`[PLAYBACK] Missing stream URL. Fetching node details for ID [${currentSong.id}]...`);
+      try {
+        const res = await fetch(`/api/songs/details?id=${currentSong.id}&type=song`);
+        if (res.ok && active) {
+          const data = await res.json();
+          if (data.song && data.song.url) {
+            addLog(`[PLAYBACK] Successfully compiled node details for: "${data.song.title}"`);
+            const resolved = data.song;
+            setCurrentSong(resolved);
+            setQueue(prev => prev.map(s => s.id === resolved.id ? resolved : s));
+          } else {
+            addLog(`[ERROR] Song details compilation returned empty URL.`);
+          }
+        }
+      } catch (err) {
+        addLog(`[ERROR] Details fetch failed: ${err.message}`);
+      }
+    };
+    
+    fetchDetails();
+
+    return () => {
+      active = false;
+    };
+  }, [currentSong]);
+
+  useEffect(() => {
+    if (!audioRef.current || !currentSong?.url) return;
+    
+    const wasPlaying = isPlaying;
+    audioRef.current.src = currentSong.url;
+    audioRef.current.load();
+    
+    if (wasPlaying) {
+      audioRef.current.play().catch(e => {
+        addLog(`[ERROR] Audio playback failed to start: ${e.message}`);
+        setIsPlaying(false);
+      });
+    }
+  }, [currentSong]);
+
+  useEffect(() => {
+    if (!audioRef.current) return;
+
+    if (isPlaying) {
+      if (audioRef.current.src) {
+        audioRef.current.play().catch(e => {
+          addLog(`[ERROR] Audio playback failed: ${e.message}`);
+          setIsPlaying(false);
+        });
+      }
+    } else {
+      audioRef.current.pause();
+    }
+  }, [isPlaying]);
+
+  // Audio event listeners
+  useEffect(() => {
+    if (!audioRef.current) return;
+
+    const handleEnded = () => {
+      addLog(`[INFO] Completed playback: "${currentSong?.title}"`);
+      if (repeat === 'one') {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(() => {});
+      } else {
+        nextSong();
+      }
+    };
+
+    const handleError = (e) => {
+      addLog(`[ERROR] Playback stream failed for: "${currentSong?.title}"`);
+      setIsPlaying(false);
+    };
+
+    audioRef.current.addEventListener('ended', handleEnded);
+    audioRef.current.addEventListener('error', handleError);
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.removeEventListener('ended', handleEnded);
+        audioRef.current.removeEventListener('error', handleError);
+      }
+    };
+  }, [queue, currentIndex, repeat, currentSong]);
 
   return (
     <PlayerContext.Provider

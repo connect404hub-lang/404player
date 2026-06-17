@@ -50,11 +50,20 @@ export default function AdminPage() {
   };
 
   useEffect(() => {
-    if (user && user.role === 'admin') {
-      fetchAdminData();
-    } else {
-      setLoading(false);
-    }
+    let active = true;
+    const timer = setTimeout(() => {
+      if (active) {
+        if (user && user.role === 'admin') {
+          fetchAdminData();
+        } else {
+          setLoading(false);
+        }
+      }
+    }, 0);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
   }, [user, token]);
 
   const handleUserAction = async (targetUserId, action) => {
@@ -104,7 +113,7 @@ export default function AdminPage() {
       <div className="flex items-center justify-between border-b border-border-color pb-3">
         <div className="flex items-center gap-2">
           <Terminal className="text-red-500" size={14} />
-          <span className="text-[11px] text-text-secondary">// ROOT: MASTER_CONTROL.sh</span>
+          <span className="text-[11px] text-text-secondary">{"// ROOT: MASTER_CONTROL.sh"}</span>
         </div>
         <span className="text-[9px] text-red-400 font-bold px-2 py-0.5 border border-red-500/30 bg-red-500/5 rounded">
           SECURE KERNEL
