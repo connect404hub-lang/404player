@@ -6,7 +6,7 @@ import { usePlayer } from '@/lib/store';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Folder, Search, Database, ListMusic, Settings, 
-  Terminal, ShieldAlert, User, LogOut, Zap
+  Terminal, ShieldAlert, User, LogOut, Zap, X, Compass
 } from 'lucide-react';
 
 export default function Sidebar() {
@@ -14,6 +14,7 @@ export default function Sidebar() {
   const pathname = usePathname();
   const { user, logout, showTerminal, setShowTerminal, addLog, haptic, currentSong, isPlaying } = usePlayer();
   const [hovered, setHovered] = useState(null);
+  const [isOpen, setIsOpen] = useState(false);
 
   const navItems = [
     { id: 'home', icon: Folder, path: '/', label: 'Explorer' },
@@ -30,112 +31,110 @@ export default function Sidebar() {
     router.push(path);
   };
 
+  const toggleOpen = () => {
+    haptic(20);
+    setIsOpen(!isOpen);
+  };
+
   return (
-    <div className="w-full h-[64px] md:w-[60px] md:h-full bg-[#080b12]/95 backdrop-blur-xl border-t md:border-t-0 md:border-r border-white/[0.06] flex flex-row md:flex-col justify-between items-center px-2 md:px-0 py-0 md:py-3 flex-shrink-0 z-30 select-none order-last md:order-first">
+    <div className="w-full h-0 md:w-[60px] md:h-full bg-transparent md:bg-[#080b12]/95 border-none md:border-r border-white/[0.06] flex flex-col justify-between items-center flex-shrink-0 z-30 select-none">
       
-      {/* MOBILE BOTTOM NAVIGATION BAR */}
-      <div className="md:hidden flex items-center justify-around w-full h-full">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = pathname === item.path;
-          return (
-            <motion.button
-              key={item.id}
-              onClick={() => handleNav(item.path)}
-              whileTap={{ scale: 0.85 }}
-              className={`relative w-11 h-11 flex items-center justify-center rounded-xl cursor-pointer transition-all duration-150 ${
-                isActive ? 'text-accent' : 'text-[#4a5568] hover:text-[#8892a4]'
-              }`}
-            >
-              {isActive && (
-                <motion.div
-                  layoutId="nav-glow-mobile"
-                  className="absolute inset-0 rounded-xl"
-                  style={{ background: 'rgba(var(--accent-rgb), 0.08)' }}
-                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                />
-              )}
-              <Icon size={19} strokeWidth={isActive ? 2 : 1.6} />
-            </motion.button>
-          );
-        })}
-
-        {/* Console (Terminal) Toggle */}
-        <motion.button
-          onClick={() => { haptic(15); setShowTerminal(!showTerminal); }}
-          whileTap={{ scale: 0.85 }}
-          className={`relative w-11 h-11 flex items-center justify-center rounded-xl cursor-pointer transition-all duration-150 ${
-            showTerminal ? 'text-accent' : 'text-[#4a5568] hover:text-[#8892a4]'
-          }`}
+      {/* MOBILE FLOATING DOCK */}
+      <div className="md:hidden fixed bottom-[92px] left-1/2 -translate-x-1/2 z-45 flex items-center justify-center">
+        <motion.div
+          animate={{
+            width: isOpen ? '320px' : '48px',
+            borderRadius: isOpen ? '24px' : '50%',
+          }}
+          transition={{ type: 'spring', stiffness: 350, damping: 26 }}
+          className="h-12 bg-[#080b12]/95 border border-white/10 shadow-[0_0_20px_rgba(var(--accent-rgb),0.15)] backdrop-blur-md flex items-center overflow-hidden px-1 justify-between"
         >
-          {showTerminal && (
-            <motion.div 
-              layoutId="nav-glow-mobile" 
-              className="absolute inset-0 rounded-xl" 
-              style={{ background: 'rgba(var(--accent-rgb), 0.08)' }} 
-              transition={{ type: 'spring', stiffness: 380, damping: 30 }} 
-            />
-          )}
-          <Terminal size={19} strokeWidth={showTerminal ? 2 : 1.6} />
-        </motion.button>
+          {isOpen ? (
+            <div className="flex items-center justify-between w-full px-2">
+              {/* Navigation items */}
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = pathname === item.path;
+                return (
+                  <motion.button
+                    key={item.id}
+                    onClick={() => {
+                      handleNav(item.path);
+                      setIsOpen(false);
+                    }}
+                    whileTap={{ scale: 0.85 }}
+                    className={`relative w-8 h-8 flex items-center justify-center rounded-lg cursor-pointer ${
+                      isActive ? 'text-accent' : 'text-[#4a5568]'
+                    }`}
+                  >
+                    <Icon size={16} strokeWidth={isActive ? 2 : 1.6} />
+                  </motion.button>
+                );
+              })}
 
-        {/* Admin Section (if admin) */}
-        {isAdmin && (
-          <motion.button 
-            onClick={() => handleNav('/admin')} 
-            whileTap={{ scale: 0.85 }} 
-            className={`relative w-11 h-11 flex items-center justify-center rounded-xl cursor-pointer transition-all ${
-              pathname === '/admin' ? 'text-red-400' : 'text-[#4a5568] hover:text-red-400/70'
-            }`}
-          >
-            {pathname === '/admin' && (
-              <motion.div 
-                layoutId="nav-glow-mobile" 
-                className="absolute inset-0 rounded-xl" 
-                style={{ background: 'rgba(239, 68, 68, 0.08)' }} 
-                transition={{ type: 'spring', stiffness: 380, damping: 30 }} 
-              />
-            )}
-            <ShieldAlert size={19} />
-          </motion.button>
-        )}
+              {/* Console (Terminal) Toggle */}
+              <motion.button
+                onClick={() => {
+                  haptic(15);
+                  setShowTerminal(!showTerminal);
+                  setIsOpen(false);
+                }}
+                whileTap={{ scale: 0.85 }}
+                className={`relative w-8 h-8 flex items-center justify-center rounded-lg cursor-pointer ${
+                  showTerminal ? 'text-accent' : 'text-[#4a5568]'
+                }`}
+              >
+                <Terminal size={16} strokeWidth={showTerminal ? 2 : 1.6} />
+              </motion.button>
 
-        {/* User profile / Login */}
-        {user ? (
-          <motion.button 
-            onClick={() => handleNav('/auth')} 
-            whileTap={{ scale: 0.9 }} 
-            className="relative w-11 h-11 flex items-center justify-center cursor-pointer"
-          >
-            <div 
-              className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold uppercase border transition-all ${
-                pathname === '/auth' ? 'text-accent border-accent' : 'text-accent/80 border-accent/25'
-              }`} 
-              style={{ background: 'rgba(var(--accent-rgb), 0.08)' }}
-            >
-              {user.username.substring(0, 2)}
+              {/* User profile / Login */}
+              {user ? (
+                <motion.button 
+                  onClick={() => {
+                    handleNav('/auth');
+                    setIsOpen(false);
+                  }} 
+                  whileTap={{ scale: 0.9 }} 
+                  className="relative w-8 h-8 flex items-center justify-center cursor-pointer"
+                >
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold uppercase border border-accent" style={{ background: 'rgba(var(--accent-rgb), 0.08)' }}>
+                    {user.username.substring(0, 2)}
+                  </div>
+                </motion.button>
+              ) : (
+                <motion.button 
+                  onClick={() => {
+                    handleNav('/auth');
+                    setIsOpen(false);
+                  }} 
+                  whileTap={{ scale: 0.85 }} 
+                  className={`relative w-8 h-8 flex items-center justify-center rounded-lg cursor-pointer ${
+                    pathname === '/auth' ? 'text-accent' : 'text-[#4a5568]'
+                  }`}
+                >
+                  <User size={16} />
+                </motion.button>
+              )}
+
+              {/* Close Button / Nav Toggle Icon */}
+              <motion.button
+                onClick={toggleOpen}
+                whileTap={{ scale: 0.85 }}
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-red-400 cursor-pointer"
+              >
+                <X size={16} />
+              </motion.button>
             </div>
-            <div className="absolute bottom-1 right-1 w-[6px] h-[6px] rounded-full bg-emerald-500 border border-[#080b12]" />
-          </motion.button>
-        ) : (
-          <motion.button 
-            onClick={() => handleNav('/auth')} 
-            whileTap={{ scale: 0.85 }} 
-            className={`relative w-11 h-11 flex items-center justify-center rounded-xl cursor-pointer transition-all ${
-              pathname === '/auth' ? 'text-accent' : 'text-[#4a5568] hover:text-[#8892a4]'
-            }`}
-          >
-            {pathname === '/auth' && (
-              <motion.div 
-                layoutId="nav-glow-mobile" 
-                className="absolute inset-0 rounded-xl" 
-                style={{ background: 'rgba(var(--accent-rgb), 0.08)' }} 
-                transition={{ type: 'spring', stiffness: 380, damping: 30 }} 
-              />
-            )}
-            <User size={19} />
-          </motion.button>
-        )}
+          ) : (
+            <motion.button
+              onClick={toggleOpen}
+              whileTap={{ scale: 0.85 }}
+              className="w-10 h-10 flex items-center justify-center rounded-full text-accent cursor-pointer mx-auto"
+            >
+              <Compass size={18} className="animate-pulse" />
+            </motion.button>
+          )}
+        </motion.div>
       </div>
 
       {/* DESKTOP SIDEBAR - MAIN NAVIGATION */}
