@@ -8,11 +8,12 @@ import {
   Palette, 
   Settings2, 
   Info,
-  Check
+  Check,
+  Download
 } from 'lucide-react';
 
 export default function SettingsPage() {
-  const { theme, setTheme, addLog } = usePlayer();
+  const { theme, setTheme, addLog, isInstallable, isStandalone, isIOS, triggerPwaInstall, setTourActive, setTourStep } = usePlayer();
 
   const [toggleStates, setToggleStates] = useState({
     autoplay: true,
@@ -50,7 +51,7 @@ export default function SettingsPage() {
             <span>01. theme_config</span>
           </h3>
 
-          <div className="flex flex-col gap-3">
+          <div id="settings-theme-selector" className="flex flex-col gap-3">
             {themes.map((t) => {
               const isActive = theme === t.id;
               return (
@@ -148,14 +149,86 @@ export default function SettingsPage() {
                 />
               </div>
             </div>
+
+            <div className="w-full h-[1px] bg-border-color/40" />
+
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="font-bold text-text-primary block">SYSTEM_ONBOARDING_TOUR</span>
+                <span className="text-text-secondary text-[10px] md:text-[11px] block mt-0.5">Replay the orientation guided tutorial step sequence</span>
+              </div>
+              <div>
+                <button
+                  onClick={() => {
+                    setTourActive(true);
+                    setTourStep(0);
+                    addLog('[SYSTEM] Interactive orientation replay triggered manually.');
+                  }}
+                  className="px-3 py-1 bg-accent/10 border border-accent text-accent hover:bg-accent hover:text-bg-primary text-[10px] font-bold rounded uppercase tracking-wider transition-colors active:scale-95 cursor-pointer"
+                >
+                  Replay Tour
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Section 3: Diagnostic Specs */}
+        {/* Section: PWA Installation */}
+        {!isStandalone && (
+          <div className="flex flex-col gap-4">
+            <h3 className="text-[10px] md:text-xs text-accent font-bold uppercase tracking-wider flex items-center gap-1.5">
+              <Download size={14} />
+              <span>03. pwa_installation</span>
+            </h3>
+
+            <div className="bg-bg-secondary/30 border border-border-color/60 rounded-lg p-4 flex flex-col gap-4 text-xs">
+              <div className="flex flex-col gap-1.5">
+                <span className="font-bold text-text-primary block">DESKTOP / MOBILE APPLICATION</span>
+                <span className="text-text-secondary text-[11px] leading-relaxed">
+                  Install 404 Player directly to your system for a native app experience, offline loading, and dedicated audio background playback.
+                </span>
+              </div>
+
+              {isIOS ? (
+                <div className="flex flex-col gap-2 p-3 bg-accent/5 border border-accent/15 rounded-lg text-[11px] text-text-secondary leading-relaxed">
+                  <div className="font-bold text-accent">iOS Installation Steps:</div>
+                  <ol className="list-decimal list-inside flex flex-col gap-1">
+                    <li>Tap the Share button in Safari (bottom navigation bar).</li>
+                    <li>Scroll and tap "Add to Home Screen".</li>
+                    <li>Tap "Add" in the top-right corner.</li>
+                  </ol>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between gap-4 mt-2">
+                  <div className="text-[10px] text-text-secondary">
+                    {isInstallable 
+                      ? "[STATUS]: App is ready for local compilation." 
+                      : "[STATUS]: Web wrapper active. Installation pending browser check."
+                    }
+                  </div>
+                  <button
+                    onClick={triggerPwaInstall}
+                    disabled={!isInstallable}
+                    className={`px-4 py-2 rounded font-bold text-xs uppercase flex items-center gap-2 transition-all cursor-pointer ${
+                      isInstallable
+                        ? 'bg-accent text-bg-primary hover:bg-accent/90 shadow-[0_0_15px_var(--accent-glow)] active:scale-95'
+                        : 'bg-white/[0.02] border border-border-color text-text-secondary cursor-not-allowed opacity-50'
+                    }`}
+                  >
+                    <Download size={13} />
+                    Run Installer
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Section 4: Diagnostic Specs */}
         <div className="flex flex-col gap-4">
           <h3 className="text-[10px] md:text-xs text-accent font-bold uppercase tracking-wider flex items-center gap-1.5">
             <Info size={14} />
-            <span>03. system_diagnostics</span>
+            <span>{isStandalone ? "03. system_diagnostics" : "04. system_diagnostics"}</span>
           </h3>
 
           <div className="bg-bg-tertiary border border-border-color rounded-lg p-4 flex flex-col gap-2 text-[10px] text-text-secondary leading-loose">

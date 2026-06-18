@@ -40,14 +40,22 @@ export async function GET(request) {
       return NextResponse.json({ playlists });
     }
 
-    const url = `https://www.jiosaavn.com/api.php?__call=autocomplete.get&_format=json&_marker=0&cc=in&api_version=4&ctx=web6dot0&query=${encodedQuery}`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('Search failed');
-    const data = await res.json();
+    // Fetch comprehensive matches from dedicated song, album, and playlist search APIs concurrently
+    const [songsData, albumsData, playlistsData] = await Promise.all([
+      fetch(`https://www.jiosaavn.com/api.php?__call=search.getResults&_format=json&_marker=0&cc=in&api_version=4&ctx=web6dot0&q=${encodedQuery}&n=12`)
+        .then(res => res.ok ? res.json() : null)
+        .catch(() => null),
+      fetch(`https://www.jiosaavn.com/api.php?__call=search.getAlbumResults&_format=json&_marker=0&cc=in&api_version=4&ctx=web6dot0&q=${encodedQuery}&n=6`)
+        .then(res => res.ok ? res.json() : null)
+        .catch(() => null),
+      fetch(`https://www.jiosaavn.com/api.php?__call=search.getPlaylistResults&_format=json&_marker=0&cc=in&api_version=4&ctx=web6dot0&q=${encodedQuery}&n=6`)
+        .then(res => res.ok ? res.json() : null)
+        .catch(() => null)
+    ]);
 
-    const songs = (data.songs?.data || []).map(formatSong).filter(Boolean);
-    const albums = (data.albums?.data || []).map(formatAlbum).filter(Boolean);
-    const playlists = (data.playlists?.data || []).map(formatPlaylist).filter(Boolean);
+    const songs = (songsData?.results || []).map(formatSong).filter(Boolean);
+    const albums = (albumsData?.results || []).map(formatAlbum).filter(Boolean);
+    const playlists = (playlistsData?.results || []).map(formatPlaylist).filter(Boolean);
 
     return NextResponse.json({
       songs,

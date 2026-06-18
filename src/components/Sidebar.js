@@ -138,13 +138,13 @@ export default function Sidebar() {
       </div>
 
       {/* DESKTOP SIDEBAR - MAIN NAVIGATION */}
-      <div className="hidden md:flex flex-col items-center justify-start w-full gap-0.5 h-auto">
+      <div id="desktop-nav" className="hidden md:flex flex-col items-center justify-start w-full gap-0.5 h-auto">
         {/* Logo */}
         <motion.div 
           onClick={() => handleNav('/')}
           whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.9 }}
-          className="w-9 h-9 rounded-lg items-center justify-center cursor-pointer mb-3 relative overflow-hidden"
+          className="w-9 h-9 rounded-lg flex items-center justify-center cursor-pointer mb-3 relative overflow-hidden"
           style={{ background: 'linear-gradient(135deg, rgba(var(--accent-rgb), 0.15), rgba(var(--accent-rgb), 0.04))' }}
         >
           <div className="absolute inset-0 opacity-30" style={{ background: 'radial-gradient(circle at 30% 30%, rgba(var(--accent-rgb), 0.3), transparent 70%)' }} />
@@ -159,6 +159,7 @@ export default function Sidebar() {
           return (
             <motion.button
               key={item.id}
+              id={`nav-${item.id}`}
               onClick={() => handleNav(item.path)}
               onMouseEnter={() => setHovered(item.id)}
               onMouseLeave={() => setHovered(null)}
@@ -207,6 +208,8 @@ export default function Sidebar() {
 
         {/* Terminal */}
         <motion.button
+          id="nav-console"
+          title="Console"
           onClick={() => { haptic(15); setShowTerminal(!showTerminal); }}
           onMouseEnter={() => setHovered('term')}
           onMouseLeave={() => setHovered(null)}

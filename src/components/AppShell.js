@@ -1,6 +1,8 @@
 'use client';
 
 import React from 'react';
+import { usePathname } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import { usePlayer } from '@/lib/store';
 import Sidebar from './Sidebar';
 import CodeTerminal from './CodeTerminal';
@@ -9,9 +11,11 @@ import RetroGrid from './RetroGrid';
 import ToastContainer from './Toast';
 import ConfirmModal from './ConfirmModal';
 import PWAInstallPrompt from './PWAInstallPrompt';
+import AppTour from './AppTour';
 
 export default function AppShell({ children }) {
   const { showTerminal } = usePlayer();
+  const pathname = usePathname();
 
   return (
     <div className="flex flex-col md:flex-row h-[100dvh] w-screen overflow-hidden bg-bg-primary text-text-primary relative select-none font-mono">
@@ -39,9 +43,18 @@ export default function AppShell({ children }) {
 
         {/* Main scrollable workspace - Added bottom padding for Player */}
         <main className="flex-1 overflow-y-auto overflow-x-hidden relative pb-[148px] md:pb-24">
-          <div className="w-full p-4 md:p-8">
-            {children}
-          </div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={pathname}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
+              className="w-full p-4 md:p-8"
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
         </main>
 
         {/* Terminal Overlay */}
@@ -54,6 +67,7 @@ export default function AppShell({ children }) {
       <ToastContainer />
       <ConfirmModal />
       <PWAInstallPrompt />
+      <AppTour />
     </div>
   );
 }

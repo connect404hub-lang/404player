@@ -18,8 +18,12 @@ export function formatSong(song) {
     artist = moreInfo.artistMap.artists.map(a => a.name).join(', ');
   } else if (song.primary_artists) {
     artist = song.primary_artists;
+  } else if (moreInfo.primary_artists) {
+    artist = moreInfo.primary_artists;
   } else if (song.singers) {
     artist = song.singers;
+  } else if (moreInfo.singers) {
+    artist = moreInfo.singers;
   }
   
   // Resolve title
@@ -70,7 +74,7 @@ export function formatAlbum(album) {
     id: album.id || album.albumid || '',
     title: album.title ? album.title.replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&#039;/g, "'") : '',
     image: formatImage(album.image),
-    artist: album.subtitle || '',
+    artist: album.subtitle || album.more_info?.music || album.description || '',
     year: album.year || '',
     songCount: album.more_info?.song_count || album.songs?.length || 0,
     songs: album.songs ? album.songs.map(formatSong).filter(Boolean) : [],

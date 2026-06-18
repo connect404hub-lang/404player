@@ -36,6 +36,12 @@ const usePlayerStore = create(
       history: [],
       toasts: [],
       confirmModal: { isOpen: false, title: '', message: '', onConfirm: null, variant: 'default', confirmLabel: '' },
+      pwaPrompt: null,
+      isInstallable: false,
+      isStandalone: false,
+      isIOS: false,
+      tourActive: false,
+      tourStep: 0,
 
       // State setters
       setUser: (user) => set({ user }),
@@ -59,6 +65,11 @@ const usePlayerStore = create(
       setHistory: (history) => set({ history }),
       setToasts: (toasts) => set({ toasts }),
       setConfirmModal: (confirmModal) => set({ confirmModal }),
+      setPwaPrompt: (pwaPrompt) => set({ pwaPrompt, isInstallable: !!pwaPrompt }),
+      setIsStandalone: (isStandalone) => set({ isStandalone }),
+      setIsIOS: (isIOS) => set({ isIOS }),
+      setTourActive: (tourActive) => set({ tourActive }),
+      setTourStep: (tourStep) => set({ tourStep }),
     }),
     {
       name: '404player-store-v1',
@@ -147,6 +158,19 @@ export function PlayerProvider({ children }) {
 
   const terminalTab = isHydrated ? store.terminalTab : 'console';
   const setTerminalTab = store.setTerminalTab;
+
+  const pwaPrompt = isHydrated ? store.pwaPrompt : null;
+  const setPwaPrompt = store.setPwaPrompt;
+  const isInstallable = isHydrated ? store.isInstallable : false;
+  const isStandalone = isHydrated ? store.isStandalone : false;
+  const setIsStandalone = store.setIsStandalone;
+  const isIOS = isHydrated ? store.isIOS : false;
+  const setIsIOS = store.setIsIOS;
+
+  const tourActive = isHydrated ? store.tourActive : false;
+  const setTourActive = store.setTourActive;
+  const tourStep = isHydrated ? store.tourStep : 0;
+  const setTourStep = store.setTourStep;
 
   const logs = isHydrated ? store.logs : [];
   const setLogs = store.setLogs;
@@ -726,8 +750,19 @@ export function PlayerProvider({ children }) {
 
         addLog('[AUTH] Offline guest workspace mounted. Profile data stored locally.');
       }
+
+      // Check if onboarding tour is completed, else trigger it
+      const tourCompleted = localStorage.getItem('404_tour_completed');
+      if (!tourCompleted) {
+        const timer = setTimeout(() => {
+          setTourActive(true);
+          setTourStep(0);
+          addLog('[SYSTEM] Onboarding sequence initialized. First-time session detected.');
+        }, 1500);
+        return () => clearTimeout(timer);
+      }
     }
-  }, [isHydrated]);
+  }, [isHydrated, setTourActive, setTourStep, addLog]);
 
   // Sync theme to body element
   useEffect(() => {
@@ -735,6 +770,48 @@ export function PlayerProvider({ children }) {
       document.body.setAttribute('data-theme', theme);
     }
   }, [theme]);
+
+  // Global PWA installation lifecycle listener
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    // 1. Standalone checking
+    const isStandaloneMode = 
+      window.matchMedia('(display-mode: standalone)').matches || 
+      (window.navigator.standalone === true);
+    setIsStandalone(isStandaloneMode);
+
+    // 2. beforeinstallprompt listener
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setPwaPrompt(e);
+      addLog('[SYSTEM] PWA installation criteria satisfied. Local installer ready.');
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    // 3. iOS Detection
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    const isIOSDevice = /iphone|ipad|ipod/.test(userAgent) && !/lkcontext/.test(userAgent);
+    if (isIOSDevice) {
+      setIsIOS(true);
+    }
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, [isHydrated, setPwaPrompt, setIsStandalone, setIsIOS, addLog]);
+
+  const triggerPwaInstall = useCallback(async () => {
+    if (!pwaPrompt) return;
+    haptic(40);
+    pwaPrompt.prompt();
+    const { outcome } = await pwaPrompt.userChoice;
+    addLog(`[SYSTEM] PWA installation user outcome: ${outcome.toUpperCase()}`);
+    if (outcome === 'accepted') {
+      setPwaPrompt(null);
+    }
+  }, [pwaPrompt, addLog, setPwaPrompt]);
 
   // Sync state changes to audio element
   useEffect(() => {
@@ -927,6 +1004,15 @@ export function PlayerProvider({ children }) {
         showConfirmModal,
         closeConfirmModal,
         haptic,
+        pwaPrompt,
+        isInstallable,
+        isStandalone,
+        isIOS,
+        triggerPwaInstall,
+        tourActive,
+        setTourActive,
+        tourStep,
+        setTourStep,
       }}
     >
       {children}

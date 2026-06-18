@@ -76,6 +76,7 @@ export default function SearchPage() {
       <div className="flex gap-2.5 bg-bg-secondary/40 p-3 md:p-4 rounded-lg border border-border-color/60 max-w-2xl">
         <div className="relative flex-1">
           <input
+            id="search-query-input"
             type="text"
             placeholder="Search songs, albums, or playlists..."
             value={query}

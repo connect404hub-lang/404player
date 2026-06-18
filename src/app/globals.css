@@ -14,6 +14,42 @@
   --font-mono: 'Geist Mono', 'Fira Code', 'Courier New', monospace;
 }
 
+[data-theme="cyber"] {
+  --bg-primary: #030712;
+  --bg-secondary: #080d19;
+  --bg-tertiary: #010309;
+  --accent: #00ffb3;
+  --accent-rgb: 0, 255, 179;
+  --accent-glow: rgba(0, 255, 179, 0.3);
+  --text-primary: #F3F4F6;
+  --text-secondary: #9CA3AF;
+  --border-color: #1F2937;
+}
+
+[data-theme="github"] {
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-tertiary: #010409;
+  --accent: #58a6ff;
+  --accent-rgb: 88, 166, 255;
+  --accent-glow: rgba(88, 166, 255, 0.3);
+  --text-primary: #c9d1d9;
+  --text-secondary: #8b949e;
+  --border-color: #30363d;
+}
+
+[data-theme="synthwave"] {
+  --bg-primary: #1a0826;
+  --bg-secondary: #2b0b3d;
+  --bg-tertiary: #0d0214;
+  --accent: #ff007f;
+  --accent-rgb: 255, 0, 127;
+  --accent-glow: rgba(255, 0, 127, 0.3);
+  --text-primary: #f8f8f2;
+  --text-secondary: #bd93f9;
+  --border-color: #4a126b;
+}
+
 @theme inline {
   --color-bg-primary: var(--bg-primary);
   --color-bg-secondary: var(--bg-secondary);
@@ -65,7 +101,7 @@ body {
   width: 100%;
   height: 100px;
   z-index: 50;
-  background: linear-gradient(0deg, transparent 0%, rgba(0, 255, 179, 0.02) 50%, transparent 100%);
+  background: linear-gradient(0deg, transparent 0%, rgba(var(--accent-rgb), 0.02) 50%, transparent 100%);
   position: absolute;
   pointer-events: none;
   animation: scan 10s linear infinite;

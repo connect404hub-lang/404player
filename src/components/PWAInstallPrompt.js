@@ -1,37 +1,21 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { usePlayer } from '@/lib/store';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Terminal, X, Download, Share, PlusSquare, ArrowUpRight, Cpu } from 'lucide-react';
 
 export default function PWAInstallPrompt() {
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const { isInstallable, isStandalone, isIOS, triggerPwaInstall } = usePlayer();
   const [showPrompt, setShowPrompt] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
-  const [isStandalone, setIsStandalone] = useState(false);
 
   useEffect(() => {
-    // 1. Register simple Service Worker for PWA criteria
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js')
-        .then((reg) => console.log('PWA Service Worker registered:', reg.scope))
-        .catch((err) => console.warn('PWA SW registration failed:', err));
+    if (isStandalone) {
+      setShowPrompt(false);
+      return;
     }
 
-    // 2. Check if running on a mobile device (user-agent based)
-    const userAgent = window.navigator.userAgent.toLowerCase();
-    const isMobileDevice = /mobi|android|iphone|ipad|ipod|webos|iemobile|blackberry/i.test(userAgent);
-    if (!isMobileDevice) return;
-
-    // 3. Check if running in standalone mode (already installed)
-    const isStandaloneMode = 
-      window.matchMedia('(display-mode: standalone)').matches || 
-      (window.navigator.standalone === true);
-    
-    setIsStandalone(isStandaloneMode);
-    if (isStandaloneMode) return;
-
-    // 4. Check if dismissed recently (within last 7 days)
+    // Check if dismissed recently (within last 7 days)
     const dismissedAt = localStorage.getItem('pwa-prompt-dismissed');
     if (dismissedAt) {
       const diff = Date.now() - parseInt(dismissedAt, 10);
@@ -40,31 +24,21 @@ export default function PWAInstallPrompt() {
       }
     }
 
-    // 5. Listen for browser installation prompt (Android / mobile browser)
-    const handleBeforeInstallPrompt = (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
+    // Check if running on a mobile device (user-agent based)
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    const isMobileDevice = /mobi|android|iphone|ipad|ipod|webos|iemobile|blackberry/i.test(userAgent);
+    if (!isMobileDevice) return;
+
+    if (isInstallable) {
       setShowPrompt(true);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    // 6. iOS Detection (iOS Safari / Chrome on iOS does not support beforeinstallprompt)
-    const isIOSDevice = /iphone|ipad|ipod/.test(userAgent) && !/lkcontext/.test(userAgent);
-    
-    if (isIOSDevice && !isStandaloneMode) {
-      setIsIOS(true);
-      // Delayed prompt for better user experience
+    } else if (isIOS) {
+      // Delayed prompt for better user experience on iOS Safari
       const timer = setTimeout(() => {
         setShowPrompt(true);
       }, 3000);
       return () => clearTimeout(timer);
     }
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    };
-  }, []);
+  }, [isInstallable, isStandalone, isIOS]);
 
   const handleDismiss = useCallback(() => {
     localStorage.setItem('pwa-prompt-dismissed', Date.now().toString());
@@ -72,25 +46,9 @@ export default function PWAInstallPrompt() {
   }, []);
 
   const handleInstall = useCallback(async () => {
-    if (!deferredPrompt) return;
-
-    // Haptic feedback
-    if (typeof navigator !== 'undefined' && navigator.vibrate) {
-      navigator.vibrate(80);
-    }
-
-    // Show native prompt
-    deferredPrompt.prompt();
-    
-    // Wait for the user's response
-    const { outcome } = await deferredPrompt.userChoice;
-    console.log(`PWA install prompt outcome: ${outcome}`);
-
-    if (outcome === 'accepted') {
-      setDeferredPrompt(null);
-      setShowPrompt(false);
-    }
-  }, [deferredPrompt]);
+    await triggerPwaInstall();
+    setShowPrompt(false);
+  }, [triggerPwaInstall]);
 
   if (!showPrompt || isStandalone) return null;
 
