@@ -5,6 +5,18 @@ export function formatImage(imageUrl) {
   return imageUrl.replace('150x150', '500x500').replace('50x50', '500x500');
 }
 
+function cleanHtml(str) {
+  if (!str) return '';
+  return str
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
+    .replace(/&#039;/g, "'")
+    .replace(/&#39;/g, "'")
+    .replace(/&apos;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
+}
+
 export function formatSong(song) {
   if (!song) return null;
   
@@ -27,16 +39,13 @@ export function formatSong(song) {
   }
   
   // Resolve title
-  const rawTitle = song.title || song.song || '';
-  const title = rawTitle.replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&#039;/g, "'");
+  const title = cleanHtml(song.title || song.song || '');
 
   // Resolve subtitle
-  const rawSubtitle = song.subtitle || song.description || '';
-  const subtitle = rawSubtitle.replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&#039;/g, "'");
+  const subtitle = cleanHtml(song.subtitle || song.description || '');
 
   // Resolve album
-  const rawAlbum = moreInfo.album || song.album || '';
-  const album = rawAlbum.replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&#039;/g, "'");
+  const album = cleanHtml(moreInfo.album || song.album || '');
 
   // Resolve media URL
   const encryptedUrl = moreInfo.encrypted_media_url || song.encrypted_media_url || song.encrypted_drm_media_url || '';
@@ -55,7 +64,7 @@ export function formatSong(song) {
     id: song.id,
     title,
     subtitle,
-    artist: artist ? artist.replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&#039;/g, "'") : 'Unknown Artist',
+    artist: artist ? cleanHtml(artist) : 'Unknown Artist',
     image: formatImage(song.image),
     album,
     albumId: moreInfo.album_id || song.albumid || '',
@@ -72,9 +81,9 @@ export function formatAlbum(album) {
   if (!album) return null;
   return {
     id: album.id || album.albumid || '',
-    title: album.title ? album.title.replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/&#039;/g, "'") : '',
+    title: album.title ? cleanHtml(album.title) : '',
     image: formatImage(album.image),
-    artist: album.subtitle || album.more_info?.music || album.description || '',
+    artist: album.subtitle ? cleanHtml(album.subtitle) : (album.more_info?.music ? cleanHtml(album.more_info.music) : (album.description ? cleanHtml(album.description) : '')),
     year: album.year || '',
     songCount: album.more_info?.song_count || album.songs?.length || 0,
     songs: album.songs ? album.songs.map(formatSong).filter(Boolean) : [],
@@ -85,9 +94,9 @@ export function formatPlaylist(playlist) {
   if (!playlist) return null;
   return {
     id: playlist.id || playlist.listid,
-    title: playlist.title || playlist.listname || playlist.name,
+    title: playlist.title ? cleanHtml(playlist.title) : (playlist.listname ? cleanHtml(playlist.listname) : (playlist.name ? cleanHtml(playlist.name) : '')),
     image: formatImage(playlist.image),
-    subtitle: playlist.subtitle || '',
+    subtitle: playlist.subtitle ? cleanHtml(playlist.subtitle) : '',
     songCount: playlist.songs?.length || playlist.more_info?.song_count || 0,
     songs: playlist.songs ? playlist.songs.map(formatSong).filter(Boolean) : [],
   };

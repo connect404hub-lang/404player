@@ -42,7 +42,7 @@ export async function GET(request) {
 
     // Fetch comprehensive matches from dedicated song, album, and playlist search APIs concurrently
     const [songsData, albumsData, playlistsData] = await Promise.all([
-      fetch(`https://www.jiosaavn.com/api.php?__call=search.getResults&_format=json&_marker=0&cc=in&api_version=4&ctx=web6dot0&q=${encodedQuery}&n=12`)
+      fetch(`https://www.jiosaavn.com/api.php?__call=search.getResults&_format=json&_marker=0&cc=in&api_version=4&ctx=web6dot0&q=${encodedQuery}&n=30`)
         .then(res => res.ok ? res.json() : null)
         .catch(() => null),
       fetch(`https://www.jiosaavn.com/api.php?__call=search.getAlbumResults&_format=json&_marker=0&cc=in&api_version=4&ctx=web6dot0&q=${encodedQuery}&n=6`)

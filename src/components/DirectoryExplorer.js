@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, 
   Play, 
+  Pause,
   Plus, 
   FolderHeart, 
   Cpu, 
@@ -15,7 +16,7 @@ import {
 } from 'lucide-react';
 
 export default function DirectoryExplorer({ id, type, onClose }) {
-  const { playSong, playlists, addSongToPlaylist, addLog } = usePlayer();
+  const { playSong, playlists, addSongToPlaylist, addLog, currentSong, isPlaying, togglePlay } = usePlayer();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -95,7 +96,7 @@ export default function DirectoryExplorer({ id, type, onClose }) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="fixed inset-0 bg-black/80 backdrop-blur-md z-55 flex items-center justify-center p-4 md:p-6 font-mono select-none"
+      className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 md:p-6 pb-24 md:pb-28 font-mono select-none"
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -183,37 +184,50 @@ export default function DirectoryExplorer({ id, type, onClose }) {
                   </div>
                 ) : (
                   <div className="flex flex-col gap-1.5 max-h-[350px] overflow-y-auto pr-1">
-                    {data.songs.map((song, idx) => (
-                      <motion.div 
-                        key={song.id}
-                        initial={{ opacity: 0, x: -12 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: idx * 0.04, type: 'spring', stiffness: 300, damping: 25 }}
-                        onClick={() => handlePlaySong(song, idx)}
-                        className="flex items-center justify-between p-2 rounded border border-border-color/30 bg-bg-secondary/40 hover:bg-bg-tertiary/50 transition-colors text-xs text-text-secondary group cursor-pointer"
-                      >
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <span className="text-[9px] text-text-secondary w-4 text-right">{idx + 1}.</span>
-                          <div className="flex flex-col min-w-0">
-                            <span className="font-semibold text-text-primary truncate">{song.title}</span>
-                            <span className="text-[10px] text-text-secondary truncate mt-0.5">{song.artist}</span>
+                    {data.songs.map((song, idx) => {
+                      const isCurrent = currentSong?.id === song.id;
+                      const isCurrentPlaying = isCurrent && isPlaying;
+                      return (
+                        <motion.div 
+                          key={song.id}
+                          initial={{ opacity: 0, x: -12 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: idx * 0.04, type: 'spring', stiffness: 300, damping: 25 }}
+                          onClick={() => isCurrent ? togglePlay() : handlePlaySong(song, idx)}
+                          className={`flex items-center justify-between p-2 rounded border transition-colors text-xs text-text-secondary group cursor-pointer ${
+                            isCurrent ? 'border-accent/40 bg-accent/5' : 'border-border-color/30 bg-bg-secondary/40 hover:bg-bg-tertiary/50'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <span className="text-[9px] text-text-secondary w-4 text-right">{idx + 1}.</span>
+                            <div className="flex flex-col min-w-0">
+                              <span className={`font-semibold truncate ${isCurrent ? 'text-accent' : 'text-text-primary'}`}>{song.title}</span>
+                              <span className="text-[10px] text-text-secondary truncate mt-0.5">{song.artist}</span>
+                            </div>
                           </div>
-                        </div>
 
-                        <div className="flex items-center gap-3 flex-shrink-0 relative">
-                          <span className="text-[10px] font-mono">{formatDuration(song.duration)}</span>
-                          
-                          {/* Play button */}
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handlePlaySong(song, idx);
-                            }}
-                            className="p-1 hover:text-accent cursor-pointer transition-colors text-text-secondary"
-                            title="Play this file"
-                          >
-                            <Play size={12} fill="currentColor" />
-                          </button>
+                          <div className="flex items-center gap-3 flex-shrink-0 relative">
+                            <span className="text-[10px] font-mono">{formatDuration(song.duration)}</span>
+                            
+                            {/* Play button */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (isCurrent) {
+                                  togglePlay();
+                                } else {
+                                  handlePlaySong(song, idx);
+                                }
+                              }}
+                              className={`p-1 hover:text-accent cursor-pointer transition-colors ${isCurrent ? 'text-accent' : 'text-text-secondary'}`}
+                              title={isCurrentPlaying ? "Pause file" : "Play file"}
+                            >
+                              {isCurrentPlaying ? (
+                                <Pause size={12} fill="currentColor" />
+                              ) : (
+                                <Play size={12} fill="currentColor" />
+                              )}
+                            </button>
 
                           {/* Add to Playlist button */}
                           <div className="relative">
@@ -259,8 +273,9 @@ export default function DirectoryExplorer({ id, type, onClose }) {
                             )}
                           </div>
                         </div>
-                      </motion.div>
-                    ))}
+                        </motion.div>
+                      );
+                    })}
                   </div>
                 )}
               </div>

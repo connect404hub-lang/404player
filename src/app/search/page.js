@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePlayer } from '@/lib/store';
 import { motion } from 'framer-motion';
 import SongCard from '@/components/SongCard';
@@ -12,7 +12,8 @@ import {
   ListMusic, 
   Music, 
   Loader,
-  FolderOpen
+  FolderOpen,
+  History
 } from 'lucide-react';
 
 export default function SearchPage() {
@@ -23,6 +24,29 @@ export default function SearchPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [explorerTarget, setExplorerTarget] = useState(null); // { id, type }
+  const [recentSearches, setRecentSearches] = useState([]);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('404_recent_searches');
+    if (stored) {
+      try {
+        setRecentSearches(JSON.parse(stored));
+      } catch (e) {
+        setRecentSearches([]);
+      }
+    }
+  }, []);
+
+  const addToRecents = (term) => {
+    if (!term || !term.trim()) return;
+    const trimmed = term.trim();
+    setRecentSearches(prev => {
+      const filtered = prev.filter(t => t.toLowerCase() !== trimmed.toLowerCase());
+      const updated = [trimmed, ...filtered].slice(0, 8);
+      localStorage.setItem('404_recent_searches', JSON.stringify(updated));
+      return updated;
+    });
+  };
 
   const triggerSearch = async (term = query, type = searchType) => {
     if (!term.trim()) return;
@@ -30,6 +54,7 @@ export default function SearchPage() {
     setLoading(true);
     setError('');
     addLog(`[SHELL] Executing query: search.exe --type=${type} "${term}"`);
+    addToRecents(term);
 
     try {
       const res = await fetch(`/api/songs/search?query=${encodeURIComponent(term)}&type=${type}`);
@@ -93,6 +118,42 @@ export default function SearchPage() {
           EXECUTE
         </button>
       </div>
+
+      {/* Recent Searches */}
+      {recentSearches.length > 0 && !loading && (
+        <div className="flex flex-col gap-3 max-w-2xl mt-1">
+          <div className="flex items-center justify-between border-b border-border-color/40 pb-1.5">
+            <span className="text-[10px] text-text-secondary uppercase tracking-widest font-bold flex items-center gap-1.5">
+              <History size={11} className="text-accent" />
+              {"// RECENT_SEARCHES"}
+            </span>
+            <button
+              onClick={() => {
+                localStorage.removeItem('404_recent_searches');
+                setRecentSearches([]);
+                addLog('[SYSTEM] Search history cleared.');
+              }}
+              className="text-[9px] text-red-400 hover:underline uppercase tracking-wider font-bold cursor-pointer bg-transparent border-none p-0"
+            >
+              [CLEAR_HISTORY]
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {recentSearches.map((term, index) => (
+              <button
+                key={index}
+                onClick={() => {
+                  setQuery(term);
+                  triggerSearch(term, searchType);
+                }}
+                className="px-2.5 py-1 bg-bg-secondary/40 border border-border-color/60 hover:border-accent hover:text-accent rounded text-[10px] md:text-xs text-text-secondary font-mono transition-all cursor-pointer hover:bg-bg-secondary/85"
+              >
+                {term}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex border-b border-border-color gap-1 bg-bg-tertiary/20 p-1 rounded max-w-md w-full">

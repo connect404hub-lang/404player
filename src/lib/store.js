@@ -363,16 +363,17 @@ export function PlayerProvider({ children }) {
     addLog(`[PLAYBACK] Mounting: "${song.title}" by "${song.artist}"`);
     haptic(20);
 
-    // Bless the audio element synchronously for mobile compatibility
-    if (audioRef.current) {
+    // Set source and start play synchronously to satisfy browser user-gesture requirements
+    if (audioRef.current && song.url) {
       try {
-        const playPromise = audioRef.current.play();
-        if (playPromise !== undefined) {
-          playPromise.then(() => {
-            audioRef.current.pause();
-          }).catch(() => {});
-        }
-      } catch (e) {}
+        audioRef.current.src = song.url;
+        audioRef.current.load();
+        audioRef.current.play().catch(e => {
+          addLog(`[ERROR] Audio play failed: ${e.message}`);
+        });
+      } catch (e) {
+        addLog(`[ERROR] Audio load failed: ${e.message}`);
+      }
     }
     
     let targetQueue = queue;
@@ -895,35 +896,38 @@ export function PlayerProvider({ children }) {
     };
   }, [queue, currentIndex, addLog]);
 
+  // Unified audio element synchronizer to prevent race conditions during track updates
   useEffect(() => {
-    if (!audioRef.current || !currentSong?.url) return;
-    
-    const wasPlaying = isPlaying;
-    audioRef.current.src = currentSong.url;
-    audioRef.current.load();
-    
-    if (wasPlaying) {
-      audioRef.current.play().catch(e => {
-        addLog(`[ERROR] Audio playback failed to start: ${e.message}`);
-        setIsPlaying(false);
-      });
-    }
-  }, [currentSong]);
+    const audio = audioRef.current;
+    if (!audio) return;
 
-  useEffect(() => {
-    if (!audioRef.current) return;
+    if (!currentSong?.url) {
+      if (isPlaying) {
+        setIsPlaying(false);
+      }
+      return;
+    }
+
+    const isSrcChanged = audio.src !== currentSong.url;
+
+    if (isSrcChanged) {
+      audio.src = currentSong.url;
+      audio.load();
+    }
 
     if (isPlaying) {
-      if (audioRef.current.src) {
-        audioRef.current.play().catch(e => {
-          addLog(`[ERROR] Audio playback failed: ${e.message}`);
-          setIsPlaying(false);
-        });
-      }
+      audio.play().catch(e => {
+        // Ignore AbortError caused by changing src/loading a new track asynchronously
+        if (e.name === 'AbortError' || e.message.includes('interrupted')) {
+          return;
+        }
+        addLog(`[ERROR] Audio playback failed: ${e.message}`);
+        setIsPlaying(false);
+      });
     } else {
-      audioRef.current.pause();
+      audio.pause();
     }
-  }, [isPlaying]);
+  }, [currentSong, isPlaying, addLog]);
 
   // Audio event listeners
   useEffect(() => {

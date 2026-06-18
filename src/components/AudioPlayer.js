@@ -93,7 +93,7 @@ export default function AudioPlayer() {
   return (
     <>
       {/* COMPACT BOTTOM CONTROLLER */}
-      <div className="h-20 w-full bg-[#080b12]/75 backdrop-blur-2xl border-t border-white/[0.04] flex items-center justify-between px-6 flex-shrink-0 select-none z-40 relative">
+      <div className="h-20 w-full bg-[#080b12]/75 backdrop-blur-2xl border-t border-white/[0.04] flex items-center justify-between px-6 flex-shrink-0 select-none z-[52] relative">
         
         {/* Left Column: Track Details */}
         <div 
@@ -306,7 +306,7 @@ export default function AudioPlayer() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: '100%' }}
                   transition={{ type: 'spring', stiffness: 260, damping: 28 }}
-                  className="fixed inset-0 bg-[#04060b] z-50 flex flex-col select-none overflow-hidden"
+                  className="fixed inset-0 bg-[#04060b] z-[60] flex flex-col select-none overflow-hidden"
                 >
                   {/* Ambient blur backdrops */}
                   <div 
