@@ -6,11 +6,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Terminal, X, Download, Share, PlusSquare, ArrowUpRight, Cpu } from 'lucide-react';
 
 export default function PWAInstallPrompt() {
-  const { isInstallable, isStandalone, isIOS, triggerPwaInstall } = usePlayer();
+  const { isInstallable, isStandalone, isIOS, triggerPwaInstall, tourActive } = usePlayer();
   const [showPrompt, setShowPrompt] = useState(false);
 
   useEffect(() => {
-    if (isStandalone) {
+    if (isStandalone || tourActive) {
       setShowPrompt(false);
       return;
     }
@@ -38,7 +38,7 @@ export default function PWAInstallPrompt() {
       }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [isInstallable, isStandalone, isIOS]);
+  }, [isInstallable, isStandalone, isIOS, tourActive]);
 
   const handleDismiss = useCallback(() => {
     localStorage.setItem('pwa-prompt-dismissed', Date.now().toString());
@@ -50,7 +50,7 @@ export default function PWAInstallPrompt() {
     setShowPrompt(false);
   }, [triggerPwaInstall]);
 
-  if (!showPrompt || isStandalone) return null;
+  if (!showPrompt || isStandalone || tourActive) return null;
 
   return (
     <AnimatePresence>

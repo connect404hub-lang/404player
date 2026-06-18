@@ -12,9 +12,8 @@ import {
 export default function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, logout, showTerminal, setShowTerminal, addLog, haptic, currentSong, isPlaying } = usePlayer();
+  const { user, logout, showTerminal, setShowTerminal, addLog, haptic, currentSong, isPlaying, mobileDockOpen, setMobileDockOpen } = usePlayer();
   const [hovered, setHovered] = useState(null);
-  const [isOpen, setIsOpen] = useState(false);
 
   const navItems = [
     { id: 'home', icon: Folder, path: '/', label: 'Explorer' },
@@ -33,7 +32,7 @@ export default function Sidebar() {
 
   const toggleOpen = () => {
     haptic(20);
-    setIsOpen(!isOpen);
+    setMobileDockOpen(!mobileDockOpen);
   };
 
   return (
@@ -42,14 +41,15 @@ export default function Sidebar() {
       {/* MOBILE FLOATING DOCK */}
       <div className="md:hidden fixed bottom-[92px] left-1/2 -translate-x-1/2 z-45 flex items-center justify-center">
         <motion.div
+          id="mobile-nav"
           animate={{
-            width: isOpen ? '320px' : '48px',
-            borderRadius: isOpen ? '24px' : '50%',
+            width: mobileDockOpen ? '320px' : '48px',
+            borderRadius: mobileDockOpen ? '24px' : '50%',
           }}
           transition={{ type: 'spring', stiffness: 350, damping: 26 }}
           className="h-12 bg-[#080b12]/95 border border-white/10 shadow-[0_0_20px_rgba(var(--accent-rgb),0.15)] backdrop-blur-md flex items-center overflow-hidden px-1 justify-between"
         >
-          {isOpen ? (
+          {mobileDockOpen ? (
             <div className="flex items-center justify-between w-full px-2">
               {/* Navigation items */}
               {navItems.map((item) => {
@@ -60,7 +60,7 @@ export default function Sidebar() {
                     key={item.id}
                     onClick={() => {
                       handleNav(item.path);
-                      setIsOpen(false);
+                      setMobileDockOpen(false);
                     }}
                     whileTap={{ scale: 0.85 }}
                     className={`relative w-8 h-8 flex items-center justify-center rounded-lg cursor-pointer ${
@@ -77,7 +77,7 @@ export default function Sidebar() {
                 onClick={() => {
                   haptic(15);
                   setShowTerminal(!showTerminal);
-                  setIsOpen(false);
+                  setMobileDockOpen(false);
                 }}
                 whileTap={{ scale: 0.85 }}
                 className={`relative w-8 h-8 flex items-center justify-center rounded-lg cursor-pointer ${
@@ -92,7 +92,7 @@ export default function Sidebar() {
                 <motion.button 
                   onClick={() => {
                     handleNav('/auth');
-                    setIsOpen(false);
+                    setMobileDockOpen(false);
                   }} 
                   whileTap={{ scale: 0.9 }} 
                   className="relative w-8 h-8 flex items-center justify-center cursor-pointer"
@@ -105,7 +105,7 @@ export default function Sidebar() {
                 <motion.button 
                   onClick={() => {
                     handleNav('/auth');
-                    setIsOpen(false);
+                    setMobileDockOpen(false);
                   }} 
                   whileTap={{ scale: 0.85 }} 
                   className={`relative w-8 h-8 flex items-center justify-center rounded-lg cursor-pointer ${

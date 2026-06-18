@@ -59,7 +59,7 @@ const TOUR_STEPS = [
 ];
 
 export default function AppTour() {
-  const { tourActive, setTourActive, tourStep, setTourStep, haptic, addLog } = usePlayer();
+  const { tourActive, setTourActive, tourStep, setTourStep, haptic, addLog, mobileDockOpen, setMobileDockOpen } = usePlayer();
   const router = useRouter();
   const pathname = usePathname();
   const [rect, setRect] = useState(null);
@@ -73,6 +73,18 @@ export default function AppTour() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Open/close mobile dock depending on the active tour step
+  useEffect(() => {
+    if (!tourActive || !isMobile) return;
+    
+    // Step 2 is EXPLORATION_INTERFACE, Step 3 is DECRYPTION_CONSOLE
+    if (tourStep === 2 || tourStep === 3) {
+      setMobileDockOpen(true);
+    } else {
+      setMobileDockOpen(false);
+    }
+  }, [tourStep, tourActive, isMobile, setMobileDockOpen]);
 
   // Sync route navigation and locate element bounding rect
   useEffect(() => {
@@ -88,14 +100,22 @@ export default function AppTour() {
       return;
     }
 
-    if (!step.target || step.position === 'center') {
+    let targetSelector = step.target;
+    if (isMobile && targetSelector === '#desktop-nav') {
+      targetSelector = '#mobile-nav';
+    }
+    if (isMobile && targetSelector === '#nav-console') {
+      targetSelector = '#mobile-nav';
+    }
+
+    if (!targetSelector || step.position === 'center') {
       setRect(null);
       return;
     }
 
     let attempts = 0;
     const findElementRect = () => {
-      const el = document.querySelector(step.target);
+      const el = document.querySelector(targetSelector);
       if (el) {
         setRect(el.getBoundingClientRect());
       } else if (attempts < 30) {
@@ -106,9 +126,15 @@ export default function AppTour() {
 
     findElementRect();
 
+    // Recalculate after the mobile dock expand transition completes
+    let timeoutId;
+    if (isMobile) {
+      timeoutId = setTimeout(findElementRect, 350);
+    }
+
     // Resize / scroll listener updates
     const handleUpdate = () => {
-      const el = document.querySelector(step.target);
+      const el = document.querySelector(targetSelector);
       if (el) setRect(el.getBoundingClientRect());
     };
 
@@ -116,10 +142,11 @@ export default function AppTour() {
     window.addEventListener('scroll', handleUpdate, true);
 
     return () => {
+      if (timeoutId) clearTimeout(timeoutId);
       window.removeEventListener('resize', handleUpdate);
       window.removeEventListener('scroll', handleUpdate, true);
     };
-  }, [tourStep, tourActive, pathname, router]);
+  }, [tourStep, tourActive, pathname, router, isMobile, mobileDockOpen]);
 
   const handleNext = useCallback(() => {
     haptic(15);
@@ -170,40 +197,83 @@ export default function AppTour() {
 
   // Calculate Tour Card placement
   let cardStyle = {};
-  if (rect && !isMobile && currentStep.position !== 'center') {
+  if (isMobile) {
+    if (rect && currentStep.position !== 'center') {
+      const elementCenterY = rect.top + rect.height / 2;
+      const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
+      
+      if (elementCenterY > viewportHeight / 2) {
+        cardStyle = {
+          left: 0,
+          right: 0,
+          marginLeft: 'auto',
+          marginRight: 'auto',
+          top: '70px',
+          bottom: 'auto',
+          x: 0,
+          y: 0
+        };
+      } else {
+        cardStyle = {
+          left: 0,
+          right: 0,
+          marginLeft: 'auto',
+          marginRight: 'auto',
+          top: 'auto',
+          bottom: '120px',
+          x: 0,
+          y: 0
+        };
+      }
+    } else {
+      cardStyle = {
+        left: 0,
+        right: 0,
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        top: '50%',
+        bottom: 'auto',
+        x: 0,
+        y: '-50%'
+      };
+    }
+  } else if (rect && currentStep.position !== 'center') {
     const margin = 20;
     if (currentStep.position === 'right') {
       cardStyle = {
         left: rect.right + margin,
         top: rect.top + rect.height / 2,
-        transform: 'translateY(-50%)'
+        x: 0,
+        y: '-50%'
       };
     } else if (currentStep.position === 'bottom') {
       cardStyle = {
         left: rect.left + rect.width / 2,
         top: rect.bottom + margin,
-        transform: 'translateX(-50%)'
+        x: '-50%',
+        y: 0
       };
     } else if (currentStep.position === 'left') {
       cardStyle = {
         left: rect.left - margin,
         top: rect.top + rect.height / 2,
-        transform: 'translate(-100%, -50%)'
+        x: '-100%',
+        y: '-50%'
       };
     } else if (currentStep.position === 'top') {
       cardStyle = {
         left: rect.left + rect.width / 2,
         top: rect.top - margin,
-        transform: 'translate(-50%, -100%)'
+        x: '-50%',
+        y: '-100%'
       };
     }
   } else {
-    // Mobile or screen center fallback
     cardStyle = {
       left: '50%',
-      top: isMobile ? 'auto' : '50%',
-      bottom: isMobile ? '130px' : 'auto',
-      transform: isMobile ? 'translateX(-50%)' : 'translate(-50%, -50%)'
+      top: '50%',
+      x: '-50%',
+      y: '-50%'
     };
   }
 
@@ -231,7 +301,16 @@ export default function AppTour() {
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.2 }}
         className="absolute w-[90vw] max-w-[360px] bg-bg-primary border border-border-color shadow-[0_0_35px_rgba(0,0,0,0.8)] rounded-lg p-4 md:p-5 flex flex-col gap-4 text-xs z-60 pointer-events-auto"
-        style={cardStyle}
+        style={{
+          left: cardStyle.left,
+          right: cardStyle.right,
+          marginLeft: cardStyle.marginLeft,
+          marginRight: cardStyle.marginRight,
+          top: cardStyle.top,
+          bottom: cardStyle.bottom,
+          x: cardStyle.x,
+          y: cardStyle.y
+        }}
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border-color pb-2.5">

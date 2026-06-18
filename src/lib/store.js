@@ -42,6 +42,7 @@ const usePlayerStore = create(
       isIOS: false,
       tourActive: false,
       tourStep: 0,
+      mobileDockOpen: false,
 
       // State setters
       setUser: (user) => set({ user }),
@@ -70,6 +71,7 @@ const usePlayerStore = create(
       setIsIOS: (isIOS) => set({ isIOS }),
       setTourActive: (tourActive) => set({ tourActive }),
       setTourStep: (tourStep) => set({ tourStep }),
+      setMobileDockOpen: (mobileDockOpen) => set({ mobileDockOpen }),
     }),
     {
       name: '404player-store-v1',
@@ -171,6 +173,9 @@ export function PlayerProvider({ children }) {
   const setTourActive = store.setTourActive;
   const tourStep = isHydrated ? store.tourStep : 0;
   const setTourStep = store.setTourStep;
+
+  const mobileDockOpen = isHydrated ? store.mobileDockOpen : false;
+  const setMobileDockOpen = store.setMobileDockOpen;
 
   const logs = isHydrated ? store.logs : [];
   const setLogs = store.setLogs;
@@ -1013,6 +1018,8 @@ export function PlayerProvider({ children }) {
         setTourActive,
         tourStep,
         setTourStep,
+        mobileDockOpen,
+        setMobileDockOpen,
       }}
     >
       {children}
