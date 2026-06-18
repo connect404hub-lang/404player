@@ -8,6 +8,7 @@ import AudioPlayer from './AudioPlayer';
 import RetroGrid from './RetroGrid';
 import ToastContainer from './Toast';
 import ConfirmModal from './ConfirmModal';
+import PWAInstallPrompt from './PWAInstallPrompt';
 
 export default function AppShell({ children }) {
   const { showTerminal } = usePlayer();
@@ -52,6 +53,7 @@ export default function AppShell({ children }) {
 
       <ToastContainer />
       <ConfirmModal />
+      <PWAInstallPrompt />
     </div>
   );
 }

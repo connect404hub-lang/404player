@@ -11,7 +11,10 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "404 Player - Developer Music Terminal",
   description: "Futuristic dark cyber developer-themed music streaming web application",
+  manifest: "/manifest.json"
 };
+
+
 
 export default function RootLayout({ children }) {
   return (
@@ -24,3 +27,4 @@ export default function RootLayout({ children }) {
     </html>
   );
 }
+
