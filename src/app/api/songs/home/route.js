@@ -1,11 +1,20 @@
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 import { NextResponse } from 'next/server';
 import { formatSong, formatAlbum, formatPlaylist } from '@/lib/formatter';
 
 export async function GET(request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const language = searchParams.get('language') || 'english,tamil';
+
     const res = await fetch(
-      'https://www.jiosaavn.com/api.php?__call=webapi.getLaunchData&api_version=4&_format=json&_marker=0&ctx=web6dot0',
-      { next: { revalidate: 3600 } } // Cache for 1 hour
+      `https://www.jiosaavn.com/api.php?__call=webapi.getLaunchData&api_version=4&_format=json&_marker=0&ctx=web6dot0&languages=${language}`,
+      {
+        headers: {
+          'Cookie': `L=${encodeURIComponent(language)}`
+        },
+        next: { revalidate: 3600 }
+      }
     );
     
     if (!res.ok) {

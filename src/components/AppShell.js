@@ -12,6 +12,7 @@ import ToastContainer from './Toast';
 import ConfirmModal from './ConfirmModal';
 import PWAInstallPrompt from './PWAInstallPrompt';
 import AppTour from './AppTour';
+import LanguageOnboardingModal from './LanguageOnboardingModal';
 
 export default function AppShell({ children }) {
   const { showTerminal, theme } = usePlayer();
@@ -78,6 +79,7 @@ export default function AppShell({ children }) {
       <ConfirmModal />
       <PWAInstallPrompt />
       <AppTour />
+      <LanguageOnboardingModal />
     </div>
   );
 }

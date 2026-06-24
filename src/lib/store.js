@@ -43,6 +43,8 @@ const usePlayerStore = create(
       tourActive: false,
       tourStep: 0,
       mobileDockOpen: false,
+      languages: ['english', 'tamil'],
+      setLanguages: (languages) => set({ languages }),
 
       // State setters
       setUser: (user) => set({ user }),
@@ -95,6 +97,7 @@ const usePlayerStore = create(
         playlists: state.playlists,
         downloads: state.downloads,
         history: state.history,
+        languages: state.languages,
       }),
     }
   )
@@ -154,6 +157,9 @@ export function PlayerProvider({ children }) {
 
   const theme = isHydrated ? store.theme : 'cyber';
   const setThemeState = store.setTheme;
+
+  const languages = isHydrated ? store.languages : ['english', 'tamil'];
+  const setLanguagesState = store.setLanguages;
 
   const showTerminal = isHydrated ? store.showTerminal : false;
   const setShowTerminal = store.setShowTerminal;
@@ -507,6 +513,12 @@ export function PlayerProvider({ children }) {
     localStorage.setItem('404_theme', themeName);
     addLog(`[SYSTEM] Client workspace stylesheet set to: ${themeName.toUpperCase()}`);
     addToast(`Theme applied: ${themeName.toUpperCase()}`, 'success');
+  };
+
+  const setLanguages = (langs) => {
+    setLanguagesState(langs);
+    addLog(`[SYSTEM] Client language preferences set to: ${langs.join(', ').toUpperCase()}`);
+    addToast(`Languages updated: ${langs.join(', ').toUpperCase()}`, 'success');
   };
 
   // Sync Database / LocalStorage helpers
@@ -968,6 +980,7 @@ export function PlayerProvider({ children }) {
         isPlaying,
         queue,
         currentIndex,
+        setCurrentIndex,
         volume,
         playbackSpeed,
         isMuted,
@@ -999,6 +1012,8 @@ export function PlayerProvider({ children }) {
         toggleShuffle,
         toggleRepeat,
         setTheme,
+        languages,
+        setLanguages,
         addLog,
         toggleFavorite,
         addDownload,

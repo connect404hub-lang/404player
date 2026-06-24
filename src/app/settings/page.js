@@ -10,6 +10,7 @@ import {
   Info,
   Check,
   Download,
+  Music,
 } from "lucide-react";
 
 export default function SettingsPage() {
@@ -23,6 +24,9 @@ export default function SettingsPage() {
     triggerPwaInstall,
     setTourActive,
     setTourStep,
+    languages,
+    setLanguages,
+    addToast,
   } = usePlayer();
 
   const [toggleStates, setToggleStates] = useState({
@@ -30,6 +34,28 @@ export default function SettingsPage() {
     prefetch: true,
     glow: true,
   });
+
+  const languagesList = [
+    { id: "english", label: "English" },
+    { id: "tamil", label: "Tamil" },
+    { id: "hindi", label: "Hindi" },
+    { id: "telugu", label: "Telugu" },
+    { id: "punjabi", label: "Punjabi" },
+    { id: "malayalam", label: "Malayalam" },
+    { id: "kannada", label: "Kannada" },
+  ];
+
+  const handleLanguageToggle = (id) => {
+    if (languages?.includes(id)) {
+      if (languages.length === 1) {
+        addToast("Choose at least one language preference", "warning");
+        return;
+      }
+      setLanguages(languages.filter((l) => l !== id));
+    } else {
+      setLanguages([...(languages || []), id]);
+    }
+  };
 
   const themes = [
     {
@@ -244,12 +270,49 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        {/* Section 3: Language Preferences */}
+        <div className="flex flex-col gap-4">
+          <h3 className="text-[10px] md:text-xs text-accent font-bold uppercase tracking-wider flex items-center gap-1.5">
+            <Music size={14} />
+            <span>03. language_preferences</span>
+          </h3>
+
+          <div className="bg-bg-secondary/30 border border-border-color/60 rounded-lg p-4 flex flex-col gap-4">
+            <span className="text-[11px] text-text-secondary leading-relaxed font-sans">
+              Choose your preferred song languages to filter trending tracks, new release albums, and curated global playlists. Search results will remain global.
+            </span>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {languagesList.map((lang) => {
+                const isActive = languages?.includes(lang.id);
+                return (
+                  <button
+                    key={lang.id}
+                    onClick={() => handleLanguageToggle(lang.id)}
+                    className={`px-3 py-2 rounded-lg border text-left flex items-center justify-between text-xs font-semibold cursor-pointer transition-all ${
+                      isActive
+                        ? "bg-bg-secondary border-accent text-accent shadow-[0_0_8px_rgba(0,255,179,0.15)]"
+                        : "bg-bg-secondary/10 border-border-color hover:bg-bg-secondary/50 hover:border-accent/20 text-text-primary"
+                    }`}
+                  >
+                    <span className="font-mono">{lang.label}</span>
+                    {isActive ? (
+                      <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                    ) : (
+                      <span className="w-1.5 h-1.5 rounded-full bg-transparent" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
         {/* Section: PWA Installation */}
         {!isStandalone && (
           <div className="flex flex-col gap-4">
             <h3 className="text-[10px] md:text-xs text-accent font-bold uppercase tracking-wider flex items-center gap-1.5">
               <Download size={14} />
-              <span>03. pwa_installation</span>
+              <span>04. pwa_installation</span>
             </h3>
 
             <div className="bg-bg-secondary/30 border border-border-color/60 rounded-lg p-4 flex flex-col gap-4 text-xs">
@@ -302,14 +365,14 @@ export default function SettingsPage() {
           </div>
         )}
 
-        {/* Section 4: Diagnostic Specs */}
+        {/* Section 5: Diagnostic Specs */}
         <div className="flex flex-col gap-4">
           <h3 className="text-[10px] md:text-xs text-accent font-bold uppercase tracking-wider flex items-center gap-1.5">
             <Info size={14} />
             <span>
               {isStandalone
-                ? "03. system_diagnostics"
-                : "04. system_diagnostics"}
+                ? "04. system_diagnostics"
+                : "05. system_diagnostics"}
             </span>
           </h3>
 

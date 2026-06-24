@@ -20,7 +20,8 @@ export default function PlaylistsBrowser() {
   const { 
     playlists, 
     playSong, 
-    addLog 
+    addLog,
+    languages
   } = usePlayer();
 
   const [curatedPlaylists, setCuratedPlaylists] = useState([]);
@@ -29,12 +30,15 @@ export default function PlaylistsBrowser() {
   const [selectedPlaylist, setSelectedPlaylist] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
 
+  const langQuery = languages ? languages.join(',') : 'english,tamil';
+
   // Fetch curated playlists on mount from home proxy
   useEffect(() => {
     const fetchCurated = async () => {
+      setLoadingCurated(true);
       addLog('[SYSTEM] Loading curated global playlist registries...');
       try {
-        const res = await fetch('/api/songs/home');
+        const res = await fetch(`/api/songs/home?language=${encodeURIComponent(langQuery)}`);
         if (res.ok) {
           const data = await res.json();
           if (data.topPlaylists) {
@@ -49,7 +53,7 @@ export default function PlaylistsBrowser() {
       }
     };
     fetchCurated();
-  }, []);
+  }, [langQuery]);
 
   const handleOpenPlaylistDetails = async (pl, isCustom = false) => {
     setSelectedPlaylist(null);

@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 
 export default function SearchPage() {
-  const { playSong, addLog } = usePlayer();
+  const { playSong, addLog, setQueue, setCurrentIndex, languages } = usePlayer();
   const [query, setQuery] = useState("");
   const [searchType, setSearchType] = useState("global"); // 'global' | 'songs' | 'albums' | 'playlists'
   const [results, setResults] = useState(null);
@@ -26,10 +26,35 @@ export default function SearchPage() {
   const [explorerTarget, setExplorerTarget] = useState(null); // { id, type }
   const [recentSearches, setRecentSearches] = useState([]);
 
+  const langQuery = languages ? languages.join(",") : "english,tamil";
+
+  // Featured content states (Trending content when search results are empty)
+  const [featuredData, setFeaturedData] = useState(null);
+  const [loadingFeatured, setLoadingFeatured] = useState(false);
+
   // Suggestion states
   const [suggestions, setSuggestions] = useState({ topquery: [], songs: [], artists: [], albums: [], playlists: [] });
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
+
+  // Fetch featured content on mount
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      setLoadingFeatured(true);
+      try {
+        const res = await fetch(`/api/songs/home?language=${encodeURIComponent(langQuery)}`);
+        if (res.ok) {
+          const json = await res.json();
+          setFeaturedData(json);
+        }
+      } catch (e) {
+        console.error("Failed to fetch featured content", e);
+      } finally {
+        setLoadingFeatured(false);
+      }
+    };
+    fetchFeatured();
+  }, [langQuery]);
 
   useEffect(() => {
     const stored = localStorage.getItem("404_recent_searches");
@@ -52,7 +77,7 @@ export default function SearchPage() {
 
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/songs/suggest?query=${encodeURIComponent(query)}`);
+        const res = await fetch(`/api/songs/suggest?query=${encodeURIComponent(query)}&language=${encodeURIComponent(langQuery)}`);
         if (res.ok) {
           const data = await res.json();
           setSuggestions(data);
@@ -68,10 +93,10 @@ export default function SearchPage() {
       } catch (e) {
         console.error("Failed to fetch suggestions", e);
       }
-    }, 300);
+    }, 150);
 
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [query, langQuery]);
 
   // Click outside to dismiss suggestions
   useEffect(() => {
@@ -97,7 +122,7 @@ export default function SearchPage() {
     });
   };
 
-  const triggerSearch = async (term = query, type = searchType) => {
+  const triggerSearch = async (term = query, type = searchType, autoPlayId = null) => {
     if (!term.trim()) return;
 
     setLoading(true);
@@ -114,6 +139,15 @@ export default function SearchPage() {
         console.log(json);
         setResults(json);
         addLog(`[SHELL] Query success. Fetched matches successfully.`);
+
+        if (autoPlayId && json.songs && json.songs.length > 0) {
+          const songIndex = json.songs.findIndex((s) => s.id === autoPlayId);
+          if (songIndex !== -1) {
+            setQueue(json.songs);
+            setCurrentIndex(songIndex);
+            addLog(`[SYSTEM] Synchronized player queue with search matches. Index: ${songIndex}`);
+          }
+        }
       } else {
         setError("Search directory error.");
         addLog(`[ERROR] Search directory compilation failed.`);
@@ -174,8 +208,8 @@ export default function SearchPage() {
     setShowSuggestions(false);
     if (item.type === "song") {
       setQuery(item.title);
-      playSongById(item.id);
-      triggerSearch(item.title, "songs");
+      playSong(item, [item]);
+      triggerSearch(item.title, "songs", item.id);
     } else if (item.type === "album") {
       setQuery(item.title);
       setExplorerTarget({ id: item.id, type: "album" });
@@ -256,6 +290,11 @@ export default function SearchPage() {
                 setShowSuggestions(true);
               }
             }}
+            onClick={() => {
+              if (query.trim().length >= 2 && flatSuggestions.length > 0) {
+                setShowSuggestions(true);
+              }
+            }}
             autoComplete="off"
             className="w-full bg-bg-tertiary border border-border-color rounded px-3 py-2 pl-9 text-[11px] md:text-xs text-text-primary focus:outline-none focus:border-accent transition-colors font-mono"
           />
@@ -297,10 +336,10 @@ export default function SearchPage() {
                     <div
                       onClick={() => handleSuggestionClick(item)}
                       onMouseEnter={() => setActiveSuggestionIndex(idx)}
-                      className={`flex items-center gap-2.5 px-3 py-2 cursor-pointer transition-colors text-[11px] md:text-xs font-mono select-none ${
+                      className={`flex items-center gap-2.5 px-3 py-2 cursor-pointer transition-all text-[11px] md:text-xs font-mono select-none border-l-2 ${
                         activeSuggestionIndex === idx
-                          ? "bg-bg-tertiary/90 text-accent font-bold"
-                          : "text-text-secondary hover:text-text-primary hover:bg-bg-tertiary/20"
+                          ? "bg-accent/10 border-accent text-accent font-bold pl-4"
+                          : "border-transparent text-text-secondary hover:text-text-primary hover:bg-bg-tertiary/20"
                       }`}
                     >
                       {item.image ? (
@@ -408,6 +447,87 @@ export default function SearchPage() {
       {/* Error state */}
       {error && (
         <div className="text-red-500 text-xs mt-2">[SEARCH ERROR] {error}</div>
+      )}
+
+      {/* Featured / Trending Content (JioSaavn/Spotify Style when no search results) */}
+      {!loading && !results && featuredData && (
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="flex flex-col gap-6 md:gap-8 mt-2"
+        >
+          {/* Section: Trending Now (Songs) */}
+          {featuredData.trending?.filter(item => item.type === "song").length > 0 && (
+            <div className="flex flex-col gap-4">
+              <h3 className="text-[10px] md:text-xs text-accent font-bold uppercase tracking-widest flex items-center gap-1.5">
+                <Music size={12} />
+                <span>Trending Now</span>
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
+                {featuredData.trending
+                  .filter(item => item.type === "song")
+                  .slice(0, 12)
+                  .map((song) => (
+                    <SongCard
+                      key={song.id}
+                      song={song}
+                      customQueue={featuredData.trending.filter(item => item.type === "song")}
+                    />
+                  ))}
+              </div>
+            </div>
+          )}
+
+          {/* Section: Hot New Releases (Albums) */}
+          {featuredData.newReleases?.length > 0 && (
+            <div className="flex flex-col gap-4">
+              <h3 className="text-[10px] md:text-xs text-accent font-bold uppercase tracking-widest flex items-center gap-1.5">
+                <Disc size={12} />
+                <span>Hot Albums</span>
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
+                {featuredData.newReleases.slice(0, 6).map((album) => (
+                  <div
+                    key={album.id}
+                    onClick={() =>
+                      setExplorerTarget({ id: album.id, type: "album" })
+                    }
+                    className="group p-3 rounded-lg border bg-bg-secondary/30 border-border-color/60 hover-beam-card hover:bg-bg-secondary/80 hover:border-accent hover:shadow-[0_0_12px_rgba(0,255,179,0.04)] cursor-pointer transition-all duration-300 interactive-card"
+                  >
+                    <div className="relative aspect-square w-full rounded overflow-hidden bg-bg-tertiary mb-3 group-hover:scale-[1.01] transition-transform duration-300">
+                      <img
+                        src={album.image}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="text-[9px] border border-accent text-accent bg-accent/5 px-2.5 py-1 rounded tracking-wider uppercase font-bold shadow-[0_0_5px_var(--accent-glow)] flex items-center gap-1">
+                          <FolderOpen size={10} />
+                          <span>OPEN ALBUM</span>
+                        </span>
+                      </div>
+                    </div>
+                    <h4 className="text-xs md:text-sm font-semibold truncate text-text-primary group-hover:text-accent transition-colors">
+                      {album.title}
+                    </h4>
+                    <p className="text-[10px] md:text-xs text-text-secondary truncate mt-1">
+                      {album.artist || "Unknown Artist"}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </motion.div>
+      )}
+
+      {/* Loading featured placeholder */}
+      {loadingFeatured && (
+        <div className="flex items-center gap-2 text-accent text-xs mt-4 animate-pulse">
+          <Loader className="animate-spin" size={13} />
+          <span>[SYSTEM] Querying trending modules...</span>
+        </div>
       )}
 
       {/* Results rendering */}

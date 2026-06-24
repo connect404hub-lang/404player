@@ -9,9 +9,12 @@ import { Cpu, Zap, FolderOpen, ChevronRight, Disc, ListMusic } from 'lucide-reac
 function useHomeData() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { languages } = usePlayer();
+  const langQuery = languages ? languages.join(',') : 'english,tamil';
 
   useEffect(() => {
-    fetch('/api/songs/home')
+    setLoading(true);
+    fetch(`/api/songs/home?language=${encodeURIComponent(langQuery)}`)
       .then(res => {
         if (!res.ok) throw new Error('Home API failed');
         return res.json();
@@ -27,7 +30,7 @@ function useHomeData() {
       .catch(() => {
         setLoading(false);
       });
-  }, []);
+  }, [langQuery]);
 
   return { data, loading };
 }
