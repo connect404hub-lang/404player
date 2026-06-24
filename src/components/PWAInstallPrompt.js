@@ -68,7 +68,7 @@ export default function PWAInstallPrompt() {
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
           transition={{ type: 'spring', stiffness: 380, damping: 26 }}
           onClick={(e) => e.stopPropagation()}
-          className="bg-bg-secondary border border-border-color rounded-xl w-full max-w-md shadow-[0_0_50px_rgba(0,0,0,0.8)] overflow-hidden relative"
+          className="glass-effect rounded-2xl w-full max-w-md overflow-hidden relative"
         >
           {/* Neon border decoration */}
           <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-accent/0 via-accent/80 to-accent/0 shadow-[0_0_10px_var(--accent)]" />
@@ -83,7 +83,7 @@ export default function PWAInstallPrompt() {
             </div>
             <button
               onClick={handleDismiss}
-              className="p-1 rounded text-text-secondary hover:text-red-400 hover:bg-white/[0.03] transition-all cursor-pointer"
+              className="p-1 rounded text-text-secondary hover:text-red-400 hover:bg-bg-secondary/40 transition-all cursor-pointer"
             >
               <X size={16} />
             </button>
@@ -112,12 +112,12 @@ export default function PWAInstallPrompt() {
             </div>
 
             {/* System Info Box */}
-            <div className="bg-bg-tertiary/60 border border-white/[0.03] rounded-lg p-3 text-[10px] text-text-secondary flex flex-col gap-1.5 font-mono">
-              <div className="flex justify-between border-b border-white/[0.03] pb-1.5">
+            <div className="bg-bg-tertiary/60 border border-border-color/30 rounded-lg p-3 text-[10px] text-text-secondary flex flex-col gap-1.5 font-mono">
+              <div className="flex justify-between border-b border-border-color/30 pb-1.5">
                 <span>[ENV]: LOCALHOST_CLIENT</span>
                 <span className="text-accent font-bold">READY</span>
               </div>
-              <div className="flex justify-between border-b border-white/[0.03] pb-1.5">
+              <div className="flex justify-between border-b border-border-color/30 pb-1.5">
                 <span>[OFFLINE]: SW_CACHING_ACTIVE</span>
                 <span className="text-accent">TRUE</span>
               </div>
@@ -151,7 +151,7 @@ export default function PWAInstallPrompt() {
             <div className="flex items-center gap-3 justify-end pt-1">
               <button
                 onClick={handleDismiss}
-                className="flex-1 sm:flex-none px-4 py-2 border border-border-color text-text-secondary hover:text-text-primary hover:bg-white/[0.02] rounded-lg text-xs font-semibold cursor-pointer transition-all"
+                className="flex-1 sm:flex-none px-4 py-2 border border-border-color text-text-secondary hover:text-text-primary hover:bg-bg-secondary/20 rounded-lg text-xs font-semibold cursor-pointer transition-all"
               >
                 Abort
               </button>

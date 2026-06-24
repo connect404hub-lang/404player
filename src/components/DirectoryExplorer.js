@@ -96,14 +96,14 @@ export default function DirectoryExplorer({ id, type, onClose }) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 md:p-6 pb-24 md:pb-28 font-mono select-none"
+      className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 md:p-6 font-mono select-none"
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 10 }}
         transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-        className="bg-bg-secondary border border-border-color rounded-xl w-full max-w-3xl h-[85vh] flex flex-col overflow-hidden shadow-2xl relative"
+        className="glass-effect rounded-xl w-full max-w-3xl max-h-[80vh] flex flex-col overflow-hidden relative"
       >
         
         {/* Glow accent bubble */}
@@ -250,7 +250,9 @@ export default function DirectoryExplorer({ id, type, onClose }) {
                             {playlistDropdown === song.id && (
                               <div 
                                 onClick={(e) => e.stopPropagation()}
-                                className="absolute right-0 bottom-6 w-40 bg-bg-secondary border border-border-color rounded shadow-xl py-1 z-55 flex flex-col text-[10px]"
+                                className={`absolute right-0 w-40 bg-bg-secondary border border-border-color rounded shadow-xl py-1 z-55 flex flex-col text-[10px] ${
+                                  idx === 0 ? 'top-6' : 'bottom-6'
+                                }`}
                               >
                                 <div className="px-2 py-1 border-b border-border-color/60 text-[9px] text-accent/60 uppercase font-bold tracking-wider flex items-center gap-1">
                                   <FolderPlus size={10} />

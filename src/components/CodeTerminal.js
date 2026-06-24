@@ -93,10 +93,10 @@ export default function CodeTerminal() {
       initial={{ y: 60, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: 'spring', stiffness: 350, damping: 28 }}
-      className="h-60 w-full bg-[#080b12]/85 backdrop-blur-xl border-t border-white/[0.04] flex flex-col flex-shrink-0 select-none z-30 font-sans"
+      className="h-60 w-full glass-effect flex flex-col flex-shrink-0 select-none z-30 font-sans"
     >
       {/* Tabs Menu Bar */}
-      <div className="h-10 w-full bg-black/20 border-b border-white/[0.04] flex items-center justify-between px-4 flex-shrink-0">
+      <div className="h-10 w-full bg-bg-tertiary/20 border-b border-border-color/30 flex items-center justify-between px-4 flex-shrink-0">
         <div className="flex h-full">
           {tabs.map((tab) => {
             const Icon = tab.icon;
@@ -108,7 +108,7 @@ export default function CodeTerminal() {
                 className={`h-full px-4 flex items-center gap-2 text-xs transition-colors cursor-pointer relative font-medium ${
                   isActive 
                     ? 'text-accent font-semibold' 
-                    : 'text-white/40 hover:text-white/70'
+                    : 'text-text-secondary/40 hover:text-text-primary/70'
                 }`}
               >
                 {isActive && (
@@ -118,7 +118,7 @@ export default function CodeTerminal() {
                     transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                   />
                 )}
-                <Icon size={12} className={isActive ? 'text-accent' : 'text-white/40'} />
+                <Icon size={12} className={isActive ? 'text-accent' : 'text-text-secondary/40'} />
                 <span className="hidden sm:inline">{tab.label}</span>
                 <span className="sm:hidden">{tab.shortLabel}</span>
               </button>
@@ -129,14 +129,14 @@ export default function CodeTerminal() {
         {/* Close Button */}
         <button
           onClick={() => setShowTerminal(false)}
-          className="text-white/30 hover:text-red-400 transition-colors p-1 cursor-pointer"
+          className="text-text-secondary/35 hover:text-red-400 transition-colors p-1 cursor-pointer"
         >
           <X size={15} />
         </button>
       </div>
 
       {/* Tab Contents Viewport */}
-      <div className="flex-1 overflow-y-auto p-4 text-xs leading-relaxed text-white/50">
+      <div className="flex-1 overflow-y-auto p-4 text-xs leading-relaxed text-text-secondary">
         <AnimatePresence mode="wait">
           <motion.div
             key={terminalTab}
@@ -147,11 +147,11 @@ export default function CodeTerminal() {
             className="h-full"
           >
         
-            {/* Tab 1: Console Logs */}
+             {/* Tab 1: Console Logs */}
             {terminalTab === 'console' && (
               <div className="h-full overflow-y-auto flex flex-col gap-1 pr-2 font-mono text-[11px]">
                 {logs.map((log, i) => {
-                  let color = 'text-white/45';
+                  let color = 'text-text-secondary/60';
                   if (log.includes('[ERROR]')) color = 'text-red-400 font-bold';
                   else if (log.includes('[SYSTEM]')) color = 'text-accent/80';
                   else if (log.includes('[PLAYBACK]')) color = 'text-blue-400';
@@ -179,12 +179,12 @@ export default function CodeTerminal() {
                   loadingLyrics ? (
                     <div className="my-auto text-accent animate-pulse font-mono">[SYSTEM] Decoding lyrics sequence...</div>
                   ) : (
-                    <div className="whitespace-pre-line text-white/80 max-w-lg leading-loose py-2 font-medium">
+                    <div className="whitespace-pre-line text-text-primary/80 max-w-lg leading-loose py-2 font-medium">
                       {lyrics}
                     </div>
                   )
                 ) : (
-                  <div className="my-auto text-white/20 italic">No active track loaded. Select a track to compile lyrics.</div>
+                  <div className="my-auto text-text-secondary/30 italic">No active track loaded. Select a track to compile lyrics.</div>
                 )}
               </div>
             )}
@@ -193,7 +193,7 @@ export default function CodeTerminal() {
             {terminalTab === 'queue' && (
               <div className="h-full overflow-y-auto pr-2 flex flex-col gap-1.5 font-sans">
                 {queue.length === 0 ? (
-                  <div className="my-auto text-center text-white/20 italic">Queue list is currently empty.</div>
+                  <div className="my-auto text-center text-text-secondary/30 italic">Queue list is currently empty.</div>
                 ) : (
                   queue.map((song, idx) => {
                     const isCurrent = currentSong?.id === song.id;
@@ -202,20 +202,20 @@ export default function CodeTerminal() {
                         key={song.id + '-' + idx}
                         className={`flex items-center justify-between p-2 rounded-xl transition-all ${
                           isCurrent 
-                            ? 'bg-white/[0.04] text-accent font-medium' 
-                            : 'bg-white/[0.01] hover:bg-white/[0.03]'
+                            ? 'bg-bg-secondary/60 text-accent font-medium' 
+                            : 'bg-bg-secondary/10 hover:bg-bg-secondary/35'
                         }`}
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <span className="text-[10px] text-white/20 w-5 text-right font-mono">
+                          <span className="text-[10px] text-text-secondary/30 w-5 text-right font-mono">
                             {idx + 1}.
                           </span>
-                          <img src={song.image} alt="" className="w-7 h-7 rounded-lg object-cover flex-shrink-0 bg-white/[0.03]" />
+                          <img src={song.image} alt="" className="w-7 h-7 rounded-lg object-cover flex-shrink-0 bg-bg-secondary/20" />
                           <div className="flex flex-col min-w-0">
-                            <span className={`text-[11px] font-semibold truncate ${isCurrent ? 'text-accent' : 'text-white/85'}`}>
+                            <span className={`text-[11px] font-semibold truncate ${isCurrent ? 'text-accent' : 'text-text-primary'}`}>
                               {song.title}
                             </span>
-                            <span className="text-[9px] text-white/40 truncate mt-0.5">
+                            <span className="text-[9px] text-text-secondary/50 truncate mt-0.5">
                               {song.artist}
                             </span>
                           </div>
@@ -224,27 +224,27 @@ export default function CodeTerminal() {
                         <div className="flex items-center gap-1.5 flex-shrink-0">
                           <button 
                             onClick={() => playSong(song)}
-                            className="p-1.5 text-white/30 hover:text-accent cursor-pointer transition-colors"
+                            className="p-1.5 text-text-secondary/40 hover:text-accent cursor-pointer transition-colors"
                           >
                             <Play size={11} fill="currentColor" />
                           </button>
                           <button 
                             onClick={() => moveQueueItem(idx, -1)}
                             disabled={idx === 0}
-                            className="p-1.5 text-white/35 hover:text-accent cursor-pointer transition-colors disabled:opacity-20"
+                            className="p-1.5 text-text-secondary/40 hover:text-accent cursor-pointer transition-colors disabled:opacity-20"
                           >
                             <ArrowUp size={11} />
                           </button>
                           <button 
                             onClick={() => moveQueueItem(idx, 1)}
                             disabled={idx === queue.length - 1}
-                            className="p-1.5 text-white/35 hover:text-accent cursor-pointer transition-colors disabled:opacity-20"
+                            className="p-1.5 text-text-secondary/40 hover:text-accent cursor-pointer transition-colors disabled:opacity-20"
                           >
                             <ArrowDown size={11} />
                           </button>
                           <button 
                             onClick={() => removeFromQueue(song.id)}
-                            className="p-1.5 text-white/30 hover:text-red-400 cursor-pointer transition-colors"
+                            className="p-1.5 text-text-secondary/45 hover:text-red-400 cursor-pointer transition-colors"
                           >
                             <Trash2 size={11} />
                           </button>

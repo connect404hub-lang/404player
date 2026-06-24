@@ -12,11 +12,13 @@ import {
 export default function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, logout, showTerminal, setShowTerminal, addLog, haptic, currentSong, isPlaying, mobileDockOpen, setMobileDockOpen } = usePlayer();
+  const { user, logout, showTerminal, setShowTerminal, addLog, haptic, currentSong, isPlaying, mobileDockOpen, setMobileDockOpen, theme } = usePlayer();
   const [hovered, setHovered] = useState(null);
 
+  const isGlass = theme?.includes('glass');
+
   const navItems = [
-    { id: 'home', icon: Folder, path: '/', label: 'Explorer' },
+    { id: 'home', icon: isGlass ? Compass : Folder, path: '/', label: isGlass ? 'Discover' : 'Explorer' },
     { id: 'search', icon: Search, path: '/search', label: 'Search' },
     { id: 'playlists', icon: ListMusic, path: '/playlists', label: 'Playlists' },
     { id: 'library', icon: Database, path: '/library', label: 'Library' },
@@ -36,7 +38,7 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="w-full h-0 md:w-[60px] md:h-full bg-transparent md:bg-[#080b12]/95 border-none md:border-r border-white/[0.06] flex flex-col justify-between items-center flex-shrink-0 z-30 select-none">
+    <div className="w-full h-0 md:w-[60px] md:h-full bg-transparent md:glass-effect border-none md:border-r border-border-color/30 flex flex-col justify-between items-center flex-shrink-0 z-30 select-none">
       
       {/* MOBILE FLOATING DOCK */}
       <div className="md:hidden fixed bottom-[92px] left-1/2 -translate-x-1/2 z-45 flex items-center justify-center">
@@ -47,7 +49,7 @@ export default function Sidebar() {
             borderRadius: mobileDockOpen ? '24px' : '50%',
           }}
           transition={{ type: 'spring', stiffness: 350, damping: 26 }}
-          className="h-12 bg-[#080b12]/95 border border-white/10 shadow-[0_0_20px_rgba(var(--accent-rgb),0.15)] backdrop-blur-md flex items-center overflow-hidden px-1 justify-between"
+          className="h-12 glass-effect shadow-[0_0_20px_rgba(var(--accent-rgb),0.15)] flex items-center overflow-hidden px-1 justify-between"
         >
           {mobileDockOpen ? (
             <div className="flex items-center justify-between w-full px-2">
@@ -64,7 +66,7 @@ export default function Sidebar() {
                     }}
                     whileTap={{ scale: 0.85 }}
                     className={`relative w-8 h-8 flex items-center justify-center rounded-lg cursor-pointer ${
-                      isActive ? 'text-accent' : 'text-[#4a5568]'
+                      isActive ? 'text-accent' : 'text-text-secondary/80 hover:text-text-primary'
                     }`}
                   >
                     <Icon size={16} strokeWidth={isActive ? 2 : 1.6} />
@@ -81,7 +83,7 @@ export default function Sidebar() {
                 }}
                 whileTap={{ scale: 0.85 }}
                 className={`relative w-8 h-8 flex items-center justify-center rounded-lg cursor-pointer ${
-                  showTerminal ? 'text-accent' : 'text-[#4a5568]'
+                  showTerminal ? 'text-accent' : 'text-text-secondary/80 hover:text-text-primary'
                 }`}
               >
                 <Terminal size={16} strokeWidth={showTerminal ? 2 : 1.6} />
@@ -109,7 +111,7 @@ export default function Sidebar() {
                   }} 
                   whileTap={{ scale: 0.85 }} 
                   className={`relative w-8 h-8 flex items-center justify-center rounded-lg cursor-pointer ${
-                    pathname === '/auth' ? 'text-accent' : 'text-[#4a5568]'
+                    pathname === '/auth' ? 'text-accent' : 'text-text-secondary/80 hover:text-text-primary'
                   }`}
                 >
                   <User size={16} />
@@ -151,7 +153,7 @@ export default function Sidebar() {
           <Zap size={15} className="text-accent relative z-10" />
         </motion.div>
 
-        <div className="w-7 h-px bg-white/[0.04] mx-auto mb-1" />
+        <div className="w-7 h-px bg-border-color/40 mx-auto mb-1" />
 
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -167,7 +169,7 @@ export default function Sidebar() {
               className={`relative w-10 h-10 flex items-center justify-center rounded-lg cursor-pointer transition-all duration-150 ${
                 isActive 
                   ? 'text-accent' 
-                  : 'text-[#4a5568] hover:text-[#8892a4]'
+                  : 'text-text-secondary/80 hover:text-text-primary'
               }`}
             >
               {isActive && (
@@ -194,7 +196,7 @@ export default function Sidebar() {
                     initial={{ opacity: 0, x: -6 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -6 }}
-                    className="absolute left-[52px] bg-[#111827] border border-white/[0.08] text-[11px] text-white/80 px-2.5 py-1 rounded-md shadow-xl z-[60] font-medium"
+                    className="absolute left-[52px] bg-bg-tertiary border border-border-color/60 text-[11px] text-text-primary px-2.5 py-1 rounded-md shadow-xl z-[60] font-medium"
                   >
                     {item.label}
                   </motion.span>
@@ -204,7 +206,7 @@ export default function Sidebar() {
           );
         })}
 
-        <div className="w-7 h-px bg-white/[0.04] mx-auto my-1" />
+        <div className="w-7 h-px bg-border-color/40 mx-auto my-1" />
 
         {/* Terminal */}
         <motion.button
@@ -215,20 +217,22 @@ export default function Sidebar() {
           onMouseLeave={() => setHovered(null)}
           whileTap={{ scale: 0.85 }}
           className={`relative w-10 h-10 flex items-center justify-center rounded-lg cursor-pointer transition-all duration-150 ${
-            showTerminal ? 'text-accent' : 'text-[#4a5568] hover:text-[#8892a4]'
+            showTerminal ? 'text-accent' : 'text-text-secondary/80 hover:text-text-primary'
           }`}
         >
           {showTerminal && <motion.div layoutId="nav-glow" className="absolute inset-0 rounded-lg" style={{ background: 'rgba(var(--accent-rgb), 0.08)' }} transition={{ type: 'spring', stiffness: 380, damping: 30 }} />}
           <Terminal size={18} strokeWidth={showTerminal ? 2 : 1.6} className="relative z-10" />
           <AnimatePresence>
             {hovered === 'term' && (
-              <motion.span initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -6 }} className="absolute left-[52px] bg-[#111827] border border-white/[0.08] text-[11px] text-white/80 px-2.5 py-1 rounded-md shadow-xl z-[60] font-medium">Console</motion.span>
+              <motion.span initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -6 }} className="absolute left-[52px] bg-bg-tertiary border border-border-color/60 text-[11px] text-text-primary px-2.5 py-1 rounded-md shadow-xl z-[60] font-medium">
+                {isGlass ? 'Logs' : 'Console'}
+              </motion.span>
             )}
           </AnimatePresence>
         </motion.button>
 
         {isAdmin && (
-          <motion.button onClick={() => handleNav('/admin')} whileTap={{ scale: 0.85 }} className={`relative w-10 h-10 flex items-center justify-center rounded-lg cursor-pointer transition-all ${pathname === '/admin' ? 'text-red-400' : 'text-[#4a5568] hover:text-red-400/70'}`}>
+          <motion.button onClick={() => handleNav('/admin')} whileTap={{ scale: 0.85 }} className={`relative w-10 h-10 flex items-center justify-center rounded-lg cursor-pointer transition-all ${pathname === '/admin' ? 'text-red-400' : 'text-text-secondary/80 hover:text-red-400'}`}>
             <ShieldAlert size={18} />
           </motion.button>
         )}
@@ -252,14 +256,14 @@ export default function Sidebar() {
               <div className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold uppercase text-accent border border-accent/25" style={{ background: 'rgba(var(--accent-rgb), 0.08)' }}>
                 {user.username.substring(0, 2)}
               </div>
-              <div className="absolute bottom-0.5 right-0.5 w-[6px] h-[6px] rounded-full bg-emerald-500 border border-[#080b12]" />
+              <div className="absolute bottom-0.5 right-0.5 w-[6px] h-[6px] rounded-full bg-emerald-500 border border-bg-primary" />
             </motion.button>
-            <motion.button onClick={logout} whileTap={{ scale: 0.85 }} className="w-10 h-10 flex items-center justify-center text-[#4a5568] hover:text-red-400/80 rounded-lg cursor-pointer transition-colors">
+            <motion.button onClick={logout} whileTap={{ scale: 0.85 }} className="w-10 h-10 flex items-center justify-center text-text-secondary/80 hover:text-red-400 rounded-lg cursor-pointer transition-colors">
               <LogOut size={15} />
             </motion.button>
           </>
         ) : (
-          <motion.button onClick={() => handleNav('/auth')} whileTap={{ scale: 0.85 }} className={`w-10 h-10 flex items-center justify-center rounded-lg cursor-pointer transition-all ${pathname === '/auth' ? 'text-accent' : 'text-[#4a5568] hover:text-[#8892a4]'}`}>
+          <motion.button onClick={() => handleNav('/auth')} whileTap={{ scale: 0.85 }} className={`w-10 h-10 flex items-center justify-center rounded-lg cursor-pointer transition-all ${pathname === '/auth' ? 'text-accent' : 'text-text-secondary/80 hover:text-text-primary'}`}>
             <User size={18} />
           </motion.button>
         )}

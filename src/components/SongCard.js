@@ -113,11 +113,11 @@ export default function SongCard({ song, customQueue = null }) {
         className={`group relative flex flex-col p-3 rounded-2xl border transition-all duration-500 cursor-pointer ${
           isCurrent 
           ? 'bg-accent/5 border-accent shadow-[0_0_25px_rgba(var(--accent-rgb),0.1)]' 
-          : 'bg-white/[0.02] border-white/[0.05] hover:border-white/20 hover:bg-white/[0.05]'
+          : 'bg-bg-secondary/40 border-border-color/30 hover:border-accent/40 hover:bg-bg-secondary/70'
         }`}
       >
         {/* Artwork Area */}
-        <div className="relative aspect-square w-full rounded-xl overflow-hidden mb-4 bg-white/[0.03]">
+        <div className="relative aspect-square w-full rounded-xl overflow-hidden mb-4 bg-bg-secondary/20">
           {song.image ? (
             <img 
               src={song.image} 
@@ -125,14 +125,14 @@ export default function SongCard({ song, customQueue = null }) {
               className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 ${isCurrent && isPlaying ? 'brightness-50 blur-[2px]' : ''}`} 
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-white/10">
+            <div className="w-full h-full flex items-center justify-center text-text-secondary/20">
               <Music size={24} />
             </div>
           )}
           
           {/* Play State Indicator Overlay */}
           <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${isCurrent ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 bg-black/40'}`}>
-            <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${isCurrent ? 'bg-accent scale-100 shadow-[0_0_15px_var(--accent)]' : 'bg-white/10 backdrop-blur-md scale-75 group-hover:scale-100'}`}>
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${isCurrent ? 'bg-accent scale-100 shadow-[0_0_15px_var(--accent)]' : 'bg-bg-secondary/40 border border-border-color/30 backdrop-blur-md scale-75 group-hover:scale-100'}`}>
                {isCurrent && isPlaying ? (
                  <Pause size={20} fill="currentColor" className="text-bg-primary" />
                ) : (
@@ -142,19 +142,19 @@ export default function SongCard({ song, customQueue = null }) {
           </div>
 
           {/* Small Data Chip */}
-          <div className="absolute top-2 right-2 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md border border-white/10 flex items-center gap-1">
+          <div className="absolute top-2 right-2 px-2 py-0.5 rounded-md bg-bg-secondary/60 backdrop-blur-md border border-border-color/30 flex items-center gap-1">
              <ShieldCheck size={8} className="text-accent" />
-             <span className="text-[7px] text-white/50 font-bold tracking-tighter">SECURED_NODE</span>
+             <span className="text-[7px] text-text-secondary font-bold tracking-tighter">SECURED_NODE</span>
           </div>
         </div>
 
         {/* Track Metadata */}
         <div className="px-1 flex flex-col gap-0.5">
-          <h4 className={`text-[13px] font-bold truncate tracking-tight transition-colors ${isCurrent ? 'text-accent' : 'text-white/90 group-hover:text-accent'}`}>
+          <h4 className={`text-[13px] font-bold truncate tracking-tight transition-colors ${isCurrent ? 'text-accent' : 'text-text-primary group-hover:text-accent'}`}>
             {song.title}
           </h4>
           <div className="flex items-center justify-between gap-2">
-             <p className="text-[11px] text-white/40 truncate flex-1">{song.artist}</p>
+             <p className="text-[11px] text-text-secondary/60 truncate flex-1">{song.artist}</p>
              {isCurrent && isPlaying && (
                <div className="flex items-center gap-[2px] h-3">
                  {[0.1, 0.2, 0.3].map((delay, i) => (
@@ -177,11 +177,11 @@ export default function SongCard({ song, customQueue = null }) {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="bg-bg-secondary border border-white/10 rounded-xl w-full max-w-xs overflow-hidden shadow-2xl relative"
+              className="bg-bg-secondary border border-border-color/60 rounded-xl w-full max-w-xs overflow-hidden shadow-2xl relative"
               onClick={e => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.05] bg-bg-tertiary/50">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border-color/30 bg-bg-tertiary/50">
                 <span className="text-[10px] text-accent font-bold uppercase tracking-wider">
                   {"// inspect_module.sh"}
                 </span>
@@ -194,11 +194,11 @@ export default function SongCard({ song, customQueue = null }) {
               </div>
 
               {/* Artwork & Info */}
-              <div className="flex items-center gap-3 p-4 border-b border-white/[0.05]">
+              <div className="flex items-center gap-3 p-4 border-b border-border-color/30">
                 {song.image ? (
-                  <img src={song.image} alt="" className="w-10 h-10 object-cover rounded border border-white/10 flex-shrink-0" />
+                  <img src={song.image} alt="" className="w-10 h-10 object-cover rounded border border-border-color/30 flex-shrink-0" />
                 ) : (
-                  <div className="w-10 h-10 bg-white/[0.05] rounded border border-white/10 flex items-center justify-center text-text-secondary flex-shrink-0">
+                  <div className="w-10 h-10 bg-bg-secondary/20 rounded border border-border-color/30 flex items-center justify-center text-text-secondary flex-shrink-0">
                     <Music size={16} />
                   </div>
                 )}
@@ -217,26 +217,26 @@ export default function SongCard({ song, customQueue = null }) {
                         toggleFavorite(song);
                         setShowActions(false);
                       }}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-xs hover:bg-white/[0.02] border-b border-white/[0.04] transition-colors text-left text-text-primary cursor-pointer"
+                      className="w-full flex items-center gap-3 px-4 py-3 text-xs hover:bg-bg-secondary/40 border-b border-border-color/30 transition-colors text-left text-text-primary cursor-pointer"
                     >
                       <Heart size={14} className={isFav ? "text-accent fill-accent" : "text-text-secondary"} />
                       <span>{isFav ? "REMOVE_FROM_FAVORITES" : "ADD_TO_FAVORITES"}</span>
                     </button>
                     <button
                       onClick={() => setShowPlaylistsList(true)}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-xs hover:bg-white/[0.02] border-b border-white/[0.04] transition-colors text-left text-text-primary cursor-pointer"
+                      className="w-full flex items-center gap-3 px-4 py-3 text-xs hover:bg-bg-secondary/40 border-b border-border-color/30 transition-colors text-left text-text-primary cursor-pointer"
                     >
                       <Plus size={14} className="text-text-secondary" />
                       <span>ADD_TO_PLAYLIST</span>
                     </button>
                   </>
                 ) : (
-                  <div className="flex flex-col bg-black/10">
-                    <div className="px-4 py-2 text-[9px] text-accent font-bold border-b border-white/[0.04] flex items-center justify-between">
+                  <div className="flex flex-col bg-bg-tertiary/20">
+                    <div className="px-4 py-2 text-[9px] text-accent font-bold border-b border-border-color/30 flex items-center justify-between">
                       <span>SELECT_PLAYLIST</span>
                       <button 
                         onClick={() => setShowPlaylistsList(false)}
-                        className="text-text-secondary hover:text-white cursor-pointer"
+                        className="text-text-secondary hover:text-text-primary cursor-pointer"
                       >
                         BACK
                       </button>
@@ -254,7 +254,7 @@ export default function SongCard({ song, customQueue = null }) {
                               addSongToPlaylist(pl.id || pl._id, song);
                               setShowActions(false);
                             }}
-                            className="w-full text-left px-4 py-2 hover:bg-white/[0.02] text-[10px] text-text-secondary hover:text-accent transition-colors truncate cursor-pointer"
+                            className="w-full text-left px-4 py-2 hover:bg-bg-secondary/40 text-[10px] text-text-secondary hover:text-accent transition-colors truncate cursor-pointer"
                           >
                             {pl.name}
                           </button>
@@ -268,7 +268,7 @@ export default function SongCard({ song, customQueue = null }) {
               {/* Close Button */}
               <button
                 onClick={() => setShowActions(false)}
-                className="w-full py-2.5 text-[11px] text-center text-red-400 hover:bg-red-500/10 transition-colors uppercase font-bold border-t border-white/[0.05] cursor-pointer"
+                className="w-full py-2.5 text-[11px] text-center text-red-400 hover:bg-red-500/10 transition-colors uppercase font-bold border-t border-border-color/30 cursor-pointer"
               >
                 CANCEL
               </button>

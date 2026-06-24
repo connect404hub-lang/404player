@@ -59,7 +59,7 @@ export default function ConfirmModal() {
             exit={{ opacity: 0, scale: 0.9, y: 10 }}
             transition={{ type: 'spring', stiffness: 400, damping: 28 }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-bg-secondary border border-border-color rounded-xl w-full max-w-sm shadow-2xl overflow-hidden"
+            className="glass-effect rounded-xl w-full max-w-sm overflow-hidden"
           >
             {/* Terminal-style header */}
             <div className="h-10 bg-bg-tertiary border-b border-border-color px-4 flex items-center justify-between">

@@ -50,6 +50,84 @@
   --border-color: #4a126b;
 }
 
+[data-theme="glass-dark"] {
+  --bg-primary: #0a0814;
+  --bg-secondary: #120e22;
+  --bg-tertiary: #050409;
+  --accent: #ec4899;
+  --accent-rgb: 236, 72, 153;
+  --accent-glow: rgba(236, 72, 153, 0.2);
+  --text-primary: #F9FAFB;
+  --text-secondary: #9CA3AF;
+  --border-color: #241c3f;
+  --font-mono: 'Outfit', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+[data-theme="glass-light"] {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f1f5f9;
+  --accent: #4f46e5;
+  --accent-rgb: 79, 70, 229;
+  --accent-glow: rgba(79, 70, 229, 0.1);
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --border-color: #e2e8f0;
+  --font-mono: 'Outfit', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+[data-theme="liquid-glass-dark"] {
+  --bg-primary: #050409;
+  --bg-secondary: #0c0a15;
+  --bg-tertiary: #020104;
+  --accent: #06b6d4;
+  --accent-rgb: 6, 182, 212;
+  --accent-glow: rgba(6, 182, 212, 0.25);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --border-color: rgba(255, 255, 255, 0.08);
+  --font-mono: 'Outfit', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+[data-theme="liquid-glass-light"] {
+  --bg-primary: #f1f5f9;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f8fafc;
+  --accent: #8b5cf6;
+  --accent-rgb: 139, 92, 246;
+  --accent-glow: rgba(139, 92, 246, 0.15);
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --border-color: rgba(0, 0, 0, 0.06);
+  --font-mono: 'Outfit', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Fluid Consumer Theme Animations & Styling Overrides */
+[data-theme*="glass"] .hover-beam-card,
+[data-theme*="glass"] .interactive-card {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  border-radius: 16px !important;
+}
+[data-theme*="glass"] .hover-beam-card:hover,
+[data-theme*="glass"] .interactive-card:hover {
+  transform: translateY(-4px) scale(1.01) !important;
+  box-shadow: 0 12px 30px -10px rgba(var(--accent-rgb), 0.15) !important;
+}
+[data-theme*="glass"] button,
+[data-theme*="glass"] input,
+[data-theme*="glass"] a,
+[data-theme*="glass"] div,
+[data-theme*="glass"] span,
+[data-theme*="glass"] p,
+[data-theme*="glass"] h1,
+[data-theme*="glass"] h2,
+[data-theme*="glass"] h3,
+[data-theme*="glass"] h4,
+[data-theme*="glass"] h5,
+[data-theme*="glass"] h6 {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 @theme inline {
   --color-bg-primary: var(--bg-primary);
   --color-bg-secondary: var(--bg-secondary);
@@ -82,9 +160,9 @@ body {
 
 /* Glass panel */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--bg-secondary);
   backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
 }
 
 .neon-border {
@@ -134,4 +212,344 @@ body {
 
 .vinyl-rotation-paused {
   animation-play-state: paused;
+}
+
+/* Liquid Glass Utility & Theme overrides */
+.glass-effect {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme="glass-dark"] .glass-effect {
+  background-color: rgba(18, 14, 34, 0.6) !important;
+  backdrop-filter: blur(20px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
+  border-color: rgba(236, 72, 153, 0.15) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25) !important;
+}
+
+[data-theme="glass-light"] .glass-effect {
+  background-color: rgba(255, 255, 255, 0.45) !important;
+  backdrop-filter: blur(20px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
+  border-color: rgba(79, 70, 229, 0.08) !important;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04) !important;
+}
+
+/* ================================================================
+   APPLE-STYLE LIQUID GLASS THEME
+   Floating morphing blobs + premium glassmorphism + edge highlights
+   ================================================================ */
+
+/* Liquid Glass Body Backgrounds */
+body[data-theme="liquid-glass-dark"] {
+  background: #07060e !important;
+}
+
+body[data-theme="liquid-glass-light"] {
+  background: #e8ecf4 !important;
+}
+
+/* ── Make ALL intermediate containers transparent ──────────── */
+[data-theme*="liquid-glass"] .app-shell-container,
+[data-theme*="liquid-glass"] .immersive-player-container {
+  background-color: transparent !important;
+}
+
+/* Hide dev-themed scanline and retro grid in liquid glass */
+[data-theme*="liquid-glass"] .scanline,
+[data-theme*="liquid-glass"] .retro-grid-container {
+  display: none !important;
+}
+
+/* ── Floating Blob Elements ─────────────────────────────────── */
+.liquid-blob {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform;
+  z-index: 1;
+}
+
+/* Dark theme blobs — vivid, large, richly saturated */
+[data-theme="liquid-glass-dark"] .liquid-blob-1 {
+  width: 55vmax;
+  height: 55vmax;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.4) 0%, rgba(59, 130, 246, 0.2) 40%, transparent 70%);
+  filter: blur(70px);
+  opacity: 0.7;
+  top: -20%;
+  left: -15%;
+  animation: float-blob-1 25s ease-in-out infinite;
+}
+
+[data-theme="liquid-glass-dark"] .liquid-blob-2 {
+  width: 50vmax;
+  height: 50vmax;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.35) 0%, rgba(236, 72, 153, 0.2) 40%, transparent 70%);
+  filter: blur(70px);
+  opacity: 0.6;
+  bottom: -25%;
+  right: -15%;
+  animation: float-blob-2 30s ease-in-out infinite;
+}
+
+[data-theme="liquid-glass-dark"] .liquid-blob-3 {
+  width: 40vmax;
+  height: 40vmax;
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.3) 0%, rgba(34, 211, 238, 0.15) 40%, transparent 70%);
+  filter: blur(60px);
+  opacity: 0.5;
+  top: 35%;
+  left: 45%;
+  animation: float-blob-3 20s ease-in-out infinite;
+}
+
+/* Light theme blobs — soft, pastel, dreamy */
+[data-theme="liquid-glass-light"] .liquid-blob-1 {
+  width: 55vmax;
+  height: 55vmax;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, rgba(99, 102, 241, 0.12) 40%, transparent 70%);
+  filter: blur(70px);
+  opacity: 0.7;
+  top: -20%;
+  left: -15%;
+  animation: float-blob-1 25s ease-in-out infinite;
+}
+
+[data-theme="liquid-glass-light"] .liquid-blob-2 {
+  width: 50vmax;
+  height: 50vmax;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.25) 0%, rgba(56, 189, 248, 0.12) 40%, transparent 70%);
+  filter: blur(70px);
+  opacity: 0.6;
+  bottom: -25%;
+  right: -15%;
+  animation: float-blob-2 30s ease-in-out infinite;
+}
+
+[data-theme="liquid-glass-light"] .liquid-blob-3 {
+  width: 42vmax;
+  height: 42vmax;
+  background: radial-gradient(circle, rgba(244, 114, 182, 0.2) 0%, rgba(251, 146, 60, 0.08) 40%, transparent 70%);
+  filter: blur(60px);
+  opacity: 0.5;
+  top: 35%;
+  left: 45%;
+  animation: float-blob-3 20s ease-in-out infinite;
+}
+
+/* ── Blob Keyframe Animations ───────────────────────────────── */
+@keyframes float-blob-1 {
+  0%   { transform: translate(0, 0) scale(1) rotate(0deg); }
+  25%  { transform: translate(10vw, 15vh) scale(1.15) rotate(45deg); }
+  50%  { transform: translate(-6vw, 10vh) scale(0.9) rotate(120deg); }
+  75%  { transform: translate(14vw, -8vh) scale(1.1) rotate(200deg); }
+  100% { transform: translate(0, 0) scale(1) rotate(360deg); }
+}
+
+@keyframes float-blob-2 {
+  0%   { transform: translate(0, 0) scale(1) rotate(0deg); }
+  20%  { transform: translate(-12vw, -10vh) scale(1.2) rotate(-60deg); }
+  40%  { transform: translate(8vw, -14vh) scale(0.85) rotate(-120deg); }
+  60%  { transform: translate(-10vw, 6vh) scale(1.15) rotate(-200deg); }
+  80%  { transform: translate(6vw, 12vh) scale(0.95) rotate(-300deg); }
+  100% { transform: translate(0, 0) scale(1) rotate(-360deg); }
+}
+
+@keyframes float-blob-3 {
+  0%   { transform: translate(0, 0) scale(1) rotate(0deg); }
+  33%  { transform: translate(-14vw, 10vh) scale(1.25) rotate(90deg); }
+  66%  { transform: translate(12vw, -12vh) scale(0.8) rotate(220deg); }
+  100% { transform: translate(0, 0) scale(1) rotate(360deg); }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   DARK LIQUID GLASS — Panel & Component Overrides
+   ══════════════════════════════════════════════════════════════ */
+
+[data-theme="liquid-glass-dark"] .glass-effect {
+  background: rgba(15, 12, 30, 0.5) !important;
+  backdrop-filter: blur(40px) saturate(180%) brightness(1.08) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(1.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.12),
+    inset 0 -1px 0 0 rgba(255, 255, 255, 0.03),
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+[data-theme="liquid-glass-dark"] .glass-panel {
+  background: rgba(15, 12, 30, 0.45) !important;
+  backdrop-filter: blur(40px) saturate(180%) brightness(1.08) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(1.08) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.1),
+    0 8px 32px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* Header */
+[data-theme="liquid-glass-dark"] header {
+  background: rgba(15, 12, 30, 0.35) !important;
+  backdrop-filter: blur(40px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(180%) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* All generic bg-bg-secondary and bg-bg-tertiary surfaces */
+[data-theme="liquid-glass-dark"] [class*="bg-bg-secondary"] {
+  background-color: rgba(15, 12, 30, 0.4) !important;
+  backdrop-filter: blur(20px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
+}
+[data-theme="liquid-glass-dark"] [class*="bg-bg-tertiary"] {
+  background-color: rgba(10, 8, 20, 0.35) !important;
+  backdrop-filter: blur(16px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
+}
+[data-theme="liquid-glass-dark"] [class*="bg-bg-primary"] {
+  background-color: transparent !important;
+}
+
+/* Cards */
+[data-theme="liquid-glass-dark"] .hover-beam-card,
+[data-theme="liquid-glass-dark"] .interactive-card {
+  background: rgba(15, 12, 30, 0.35) !important;
+  backdrop-filter: blur(24px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.06), 0 4px 16px rgba(0, 0, 0, 0.2) !important;
+}
+[data-theme="liquid-glass-dark"] .hover-beam-card:hover,
+[data-theme="liquid-glass-dark"] .interactive-card:hover {
+  background: rgba(15, 12, 30, 0.55) !important;
+  border-color: rgba(6, 182, 212, 0.2) !important;
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.12), 0 12px 40px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Inputs & textareas */
+[data-theme="liquid-glass-dark"] input,
+[data-theme="liquid-glass-dark"] textarea {
+  background-color: rgba(15, 12, 30, 0.5) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+}
+
+/* Scrollbar */
+[data-theme="liquid-glass-dark"] ::-webkit-scrollbar-thumb {
+  background: rgba(6, 182, 212, 0.35) !important;
+}
+
+/* Modals & Overlays */
+[data-theme="liquid-glass-dark"] [class*="bg-black/"] {
+  backdrop-filter: blur(12px) saturate(130%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(130%) !important;
+}
+
+/* Buttons */
+[data-theme="liquid-glass-dark"] button {
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   LIGHT LIQUID GLASS — Panel & Component Overrides
+   ══════════════════════════════════════════════════════════════ */
+
+[data-theme="liquid-glass-light"] .glass-effect {
+  background: rgba(255, 255, 255, 0.55) !important;
+  backdrop-filter: blur(40px) saturate(180%) brightness(1.05) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(1.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.65) !important;
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.75),
+    inset 0 -1px 0 0 rgba(255, 255, 255, 0.15),
+    0 8px 32px rgba(0, 0, 0, 0.06),
+    0 2px 8px rgba(0, 0, 0, 0.03) !important;
+}
+
+[data-theme="liquid-glass-light"] .glass-panel {
+  background: rgba(255, 255, 255, 0.5) !important;
+  backdrop-filter: blur(40px) saturate(180%) brightness(1.05) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(1.05) !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.7),
+    0 8px 32px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Header */
+[data-theme="liquid-glass-light"] header {
+  background: rgba(255, 255, 255, 0.4) !important;
+  backdrop-filter: blur(40px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(180%) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* All generic bg-bg-secondary and bg-bg-tertiary surfaces */
+[data-theme="liquid-glass-light"] [class*="bg-bg-secondary"] {
+  background-color: rgba(255, 255, 255, 0.45) !important;
+  backdrop-filter: blur(20px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(150%) !important;
+}
+[data-theme="liquid-glass-light"] [class*="bg-bg-tertiary"] {
+  background-color: rgba(255, 255, 255, 0.35) !important;
+  backdrop-filter: blur(16px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
+}
+[data-theme="liquid-glass-light"] [class*="bg-bg-primary"] {
+  background-color: transparent !important;
+}
+
+/* Cards */
+[data-theme="liquid-glass-light"] .hover-beam-card,
+[data-theme="liquid-glass-light"] .interactive-card {
+  background: rgba(255, 255, 255, 0.45) !important;
+  backdrop-filter: blur(24px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+  border-color: rgba(255, 255, 255, 0.55) !important;
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.65), 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+}
+[data-theme="liquid-glass-light"] .hover-beam-card:hover,
+[data-theme="liquid-glass-light"] .interactive-card:hover {
+  background: rgba(255, 255, 255, 0.7) !important;
+  border-color: rgba(139, 92, 246, 0.2) !important;
+  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.85), 0 12px 40px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Inputs & textareas */
+[data-theme="liquid-glass-light"] input,
+[data-theme="liquid-glass-light"] textarea {
+  background-color: rgba(255, 255, 255, 0.55) !important;
+  border-color: rgba(255, 255, 255, 0.55) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+}
+
+/* Scrollbar */
+[data-theme="liquid-glass-light"] ::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.35) !important;
+}
+
+/* Modals & Overlays */
+[data-theme="liquid-glass-light"] [class*="bg-black/"] {
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(16px) saturate(130%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(130%) !important;
+}
+
+/* Buttons */
+[data-theme="liquid-glass-light"] button {
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+/* ── Neon border suppression for liquid glass ─────────────── */
+[data-theme*="liquid-glass"] .neon-border {
+  box-shadow: none !important;
 }

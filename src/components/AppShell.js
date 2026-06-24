@@ -14,22 +14,32 @@ import PWAInstallPrompt from './PWAInstallPrompt';
 import AppTour from './AppTour';
 
 export default function AppShell({ children }) {
-  const { showTerminal } = usePlayer();
+  const { showTerminal, theme } = usePlayer();
   const pathname = usePathname();
+  const isLiquidGlass = theme?.includes('liquid-glass');
 
   return (
-    <div className="flex flex-col md:flex-row h-[100dvh] w-screen overflow-hidden bg-bg-primary text-text-primary relative select-none font-mono">
+    <div className="app-shell-container flex flex-col md:flex-row h-[100dvh] w-screen overflow-hidden bg-bg-primary text-text-primary relative select-none font-mono">
       {/* Visual Background Layers */}
       <RetroGrid />
       <div className="scanline" />
+
+      {/* Apple-style Liquid Glass Floating Blobs */}
+      {isLiquidGlass && (
+        <>
+          <div className="liquid-blob liquid-blob-1" />
+          <div className="liquid-blob liquid-blob-2" />
+          <div className="liquid-blob liquid-blob-3" />
+        </>
+      )}
 
       {/* Sidebar Navigation */}
       <Sidebar />
 
       <div className="flex flex-1 flex-col h-full overflow-hidden relative z-10">
         {/* Top Header / Status Bar */}
-        <header className="h-10 border-b border-white/[0.04] px-6 flex items-center justify-between bg-bg-primary/50 backdrop-blur-md">
-          <div className="flex items-center gap-4 text-[10px] text-white/35 tracking-widest font-bold">
+        <header className="h-10 border-b border-border-color/30 px-6 flex items-center justify-between bg-bg-primary/50 backdrop-blur-md">
+          <div className="flex items-center gap-4 text-[10px] text-text-secondary/40 tracking-widest font-bold">
             <span className="flex items-center gap-1.5">
                <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
                SYSTEM_ACTIVE

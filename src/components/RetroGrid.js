@@ -4,7 +4,7 @@ import React from 'react';
 
 export default function RetroGrid() {
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 opacity-[0.08] select-none">
+    <div className="retro-grid-container absolute inset-0 overflow-hidden pointer-events-none z-0 opacity-[0.08] select-none">
       <div 
         className="absolute inset-0"
         style={{

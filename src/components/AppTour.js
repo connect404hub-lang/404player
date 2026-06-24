@@ -342,7 +342,7 @@ export default function AppTour() {
             {tourStep > 0 && (
               <button
                 onClick={handleBack}
-                className="p-1 px-2.5 bg-white/[0.02] border border-border-color hover:border-text-secondary text-text-secondary hover:text-text-primary rounded text-[10px] uppercase font-bold flex items-center gap-1 transition-all active:scale-95 cursor-pointer"
+                className="p-1 px-2.5 bg-bg-secondary/40 border border-border-color hover:border-text-secondary text-text-secondary hover:text-text-primary rounded text-[10px] uppercase font-bold flex items-center gap-1 transition-all active:scale-95 cursor-pointer"
               >
                 <ChevronLeft size={12} />
                 Back
